@@ -307,6 +307,7 @@
     margin-bottom: 24px;
   }
   .results-title {
+    color: var(--gold-light);
     font-size: 20px; font-weight: 800;
   }
   .badge-scenario {
@@ -753,7 +754,7 @@
         ⚡ 反社畜指數計算
       </button>
       <button class="btn-special btn-share" onclick="shareResult()">
-        📤 分享結果
+        � 分享到社群
       </button>
     </div>
 
@@ -1090,17 +1091,24 @@
   window.shareResult = function() {
     if (!lastResult) { showToast('請先執行模擬！'); return; }
     var r = lastResult;
-    var text = '人生模擬器結果 📊\n'
+    var text = '📊 人生模擬器結果\n'
       + '職業：' + (occLabel[r.occ] || r.occ) + ' ｜ 城市：' + (cityLabel[r.city] || r.city) + '\n'
       + '策略：' + scenarioLabel[r.sc] + '\n'
-      + '5年後月收入預估：$' + fmt(r.data[3].value) + '\n'
-      + '#人生模擬器 #財務自由 #被動收入';
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(function() {
-        showToast('✅ 結果已複製到剪貼簿！');
-      }).catch(function() { fallbackCopy(text); });
+      + '5 年後月收入預估：$' + fmt(r.data[3].value) + '\n\n'
+      + '#人生模擬器 #財務自由 #被動收入\n\n來測試你的人生軌跡 👇';
+    var url = window.location.href;
+    if (navigator.share) {
+      navigator.share({ title: '人生模擬器 — 預見你的未來可能性', text: text, url: url })
+        .catch(function() {});
     } else {
-      fallbackCopy(text);
+      var full = text + '\n' + url;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(full).then(function() {
+          showToast('✅ 已複製！請貼到 Instagram 限時動態或貿文分享');
+        }).catch(function() { fallbackCopy(full); });
+      } else {
+        fallbackCopy(full);
+      }
     }
   };
 
