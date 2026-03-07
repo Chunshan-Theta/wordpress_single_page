@@ -409,6 +409,69 @@ body {
   50% { box-shadow: 0 0 0 6px rgba(220,50,50,0); }
 }
 
+/* ── Realm Breakthrough Overlay ── */
+#realm-breakthrough {
+  position: fixed; inset: 0; z-index: 999;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at center, rgba(20,8,50,.97) 0%, rgba(6,4,14,.99) 100%);
+  opacity: 0; pointer-events: none;
+  transition: opacity .4s ease;
+}
+#realm-breakthrough.show {
+  opacity: 1; pointer-events: all;
+}
+.rb-content {
+  text-align: center;
+  animation: rb-enter .55s cubic-bezier(.34,1.56,.64,1) both;
+  padding: 0 24px;
+}
+.rb-sparks {
+  font-size: 52px; margin-bottom: 16px;
+  animation: rb-spin 2s linear infinite;
+  display: inline-block;
+}
+.rb-label {
+  font-size: 13px; letter-spacing: 5px;
+  color: rgba(232,220,200,.55); margin-bottom: 14px;
+  text-transform: uppercase;
+}
+.rb-name {
+  font-size: clamp(42px, 12vw, 80px); font-weight: 900;
+  letter-spacing: 10px; line-height: 1;
+  margin-bottom: 18px;
+  animation: rb-glow 1.4s ease-in-out infinite;
+}
+.rb-divider {
+  width: 120px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-light), transparent);
+  margin: 0 auto 18px;
+}
+.rb-sub {
+  font-size: 14px; color: rgba(232,220,200,.6);
+  letter-spacing: 2px; line-height: 1.8; margin-bottom: 28px;
+}
+.rb-dismiss {
+  height: auto;
+  padding: 13px 36px;
+  border: 1px solid rgba(200,150,12,.5); border-radius: 10px;
+  background: rgba(200,150,12,.15); color: var(--gold-light);
+  font-size: 14px; font-weight: 700; letter-spacing: 3px;
+  cursor: pointer; font-family: inherit; transition: all .2s;
+}
+.rb-dismiss:hover { background: rgba(200,150,12,.3); box-shadow: 0 0 20px rgba(200,150,12,.3); }
+@keyframes rb-enter {
+  from { opacity: 0; transform: scale(.7) translateY(30px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes rb-glow {
+  0%,100% { filter: drop-shadow(0 0 10px currentColor); }
+  50%      { filter: drop-shadow(0 0 30px currentColor) drop-shadow(0 0 60px currentColor); }
+}
+@keyframes rb-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
 /* ── Responsive ── */
 @media (max-width: 600px) {
   .indicators { grid-template-columns: repeat(3, 1fr); }
@@ -478,6 +541,7 @@ body {
       <div class="realm-banner">
         <div class="realm-title" id="realm-title">凡人境</div>
         <div class="realm-sub" id="age-display">年歲　零歲</div>
+        <div class="realm-sub" id="realm-next" style="font-size:11px;margin-top:4px;color:rgba(232,220,200,.35);"></div>
       </div>
 
       <!-- Trait chips -->
@@ -514,6 +578,18 @@ body {
   </div>
 
 </div><!-- /wrap -->
+
+<!-- Realm Breakthrough Overlay -->
+<div id="realm-breakthrough">
+  <div class="rb-content">
+    <div class="rb-sparks">✦</div>
+    <div class="rb-label">突破境界</div>
+    <div class="rb-name" id="rb-name"></div>
+    <div class="rb-divider"></div>
+    <div class="rb-sub" id="rb-sub"></div>
+    <button class="rb-dismiss" onclick="dismissBreakthrough()">繼續修煉 ▶</button>
+  </div>
+</div>
 
 <script>
 (function () {
@@ -679,6 +755,7 @@ var state = {
   negativeTrait: null,
   name: '',
   age: 0,
+  realmIdx: 0,
   stats: { health:50, wealth:50, mind:50, social:50, luck:50 },
   alive: true,
   lastEventText: ''
@@ -779,6 +856,7 @@ window.beginSimulation = function() {
   // Apply trait initial mods
   state.name = (document.getElementById('player-name-input').value || '').trim() || '道友';
   state.age = 0;
+  state.realmIdx = 0;
   state.stats = { health:50, wealth:50, mind:50, social:50, luck:50 };
   state.alive = true;
 
@@ -836,8 +914,12 @@ window.nextYear = function() {
   clampStats();
 
   // 4) Render
+  var oldRealmIdx = state.realmIdx;
   renderIndicators();
   updateRealm();
+  if (state.realmIdx > oldRealmIdx) {
+    showRealmBreakthrough(REALMS[state.realmIdx]);
+  }
   appendLogEntry(state.age, event.text, finalMods, false);
 
   // 5) Auto-scroll log
@@ -989,10 +1071,13 @@ window.shareResult = function() {
 window.reborn = function() {
   state.selectedTraits = [];
   state.negativeTrait = null;
+  state.name = '';
   state.age = 0;
+  state.realmIdx = 0;
   state.stats = { health:50, wealth:50, mind:50, social:50, luck:50 };
   state.alive = true;
   state.lastEventText = '';
+  dismissBreakthrough();
 
   document.getElementById('phase-death').style.display = 'none';
   document.getElementById('phase-game').style.display = 'none';
@@ -1053,12 +1138,45 @@ function getCurrentRealm() {
 }
 
 function updateRealm() {
-  var r = getCurrentRealm();
+  var newIdx = 0;
+  for (var i = 0; i < REALMS.length; i++) {
+    if (state.age >= REALMS[i].age) newIdx = i;
+  }
+  state.realmIdx = newIdx;
+  var r = REALMS[newIdx];
   var rt = document.getElementById('realm-title');
   rt.textContent = r.name;
   rt.style.color = r.colour;
   document.getElementById('age-display').textContent = '年歲　' + chineseAge(state.age);
+  var next = REALMS[newIdx + 1];
+  var nextEl = document.getElementById('realm-next');
+  if (nextEl) {
+    nextEl.textContent = next
+      ? '下一境界「' + next.name + '」· ' + next.age + ' 歲'
+      : '✦ 已達仙人境，登臨絕頂 ✦';
+  }
 }
+
+function showRealmBreakthrough(realm) {
+  var el = document.getElementById('realm-breakthrough');
+  var nameEl = document.getElementById('rb-name');
+  var subEl  = document.getElementById('rb-sub');
+  var spark  = el.querySelector('.rb-sparks');
+  nameEl.textContent = realm.name;
+  nameEl.style.color = realm.colour;
+  spark.style.color  = realm.colour;
+  var prevRealm = REALMS[state.realmIdx - 1];
+  subEl.innerHTML = (prevRealm ? '自「' + prevRealm.name + '」突破而來<br>' : '')
+    + '恭喜踏入 <strong style="color:' + realm.colour + '">' + realm.name + '</strong>，再上一層樓！';
+  el.classList.add('show');
+  clearTimeout(window._rbTimer);
+  window._rbTimer = setTimeout(dismissBreakthrough, 6000);
+}
+
+window.dismissBreakthrough = function() {
+  clearTimeout(window._rbTimer);
+  document.getElementById('realm-breakthrough').classList.remove('show');
+};
 
 function chineseAge(n) {
   if (n === 0) return '零歲';
