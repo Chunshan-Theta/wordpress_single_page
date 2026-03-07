@@ -356,6 +356,23 @@ body {
   background: rgba(200,150,12,.3);
   box-shadow: 0 0 24px rgba(200,150,12,.4);
 }
+.btn-share-ig {
+  height: auto;
+  padding: 12px 32px;
+  border: 2px solid #c13584;
+  border-radius: 10px;
+  background: rgba(193,53,132,.12);
+  color: #f0a0d0;
+  font-size: 15px; font-weight: 700;
+  letter-spacing: 2px; cursor: pointer;
+  font-family: inherit;
+  transition: all .2s;
+  margin-top: 12px;
+}
+.btn-share-ig:hover {
+  background: rgba(193,53,132,.28);
+  box-shadow: 0 0 22px rgba(193,53,132,.4);
+}
 
 /* ── Trait Chips (in-game) ── */
 .trait-chips {
@@ -467,6 +484,8 @@ body {
         <div class="ds-label">歲　壽盡圓寂</div>
         <div class="ds-epitaph" id="death-epitaph"></div>
         <button class="btn-reborn" onclick="reborn()">☯ 轉世重修</button>
+        <br>
+        <button class="btn-share-ig" onclick="shareResult()">📸 分享生命歷程</button>
       </div>
     </div>
   </div>
@@ -884,6 +903,37 @@ function buildEpitaph(reason) {
     + (state.lastEventText ? '<em>臨終之際——「'+state.lastEventText+'」</em><br><br>' : '')
     + '「道可道，非常道。」';
 }
+
+/* ══════════════════════════════════════════
+   SHARE
+══════════════════════════════════════════ */
+window.shareResult = function() {
+  var realm = getCurrentRealm().name;
+  var traits = state.selectedTraits.map(function(id) {
+    var t = POSITIVE_TRAITS.find(function(x){ return x.id === id; });
+    return t ? '【' + t.name + '】' : id;
+  }).join('');
+  var neg = state.negativeTrait ? '\n宿命烙印：【' + state.negativeTrait.name + '】' : '';
+  var text = '【修仙模擬器 — 問道蒼穹】\n'
+    + '享年 ' + state.age + ' 歲，止步於「' + realm + '」\n'
+    + '天賦：' + traits + neg + '\n'
+    + (state.lastEventText ? '臨終之際：「' + state.lastEventText + '」\n' : '')
+    + '\n「道可道，非常道。」\n\n'
+    + '來挑戰你的修仙命運 👇';
+  var url = window.location.href;
+  if (navigator.share) {
+    navigator.share({ title: '修仙模擬器 — 問道蒼穹', text: text, url: url }).catch(function() {});
+  } else {
+    var full = text + '\n' + url;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(full).then(function() {
+        alert('已複製到剪貼簿！請開啟 Instagram 貼文或限時動態貼上分享。');
+      }).catch(function() { prompt('複製以下內容分享到 Instagram：', full); });
+    } else {
+      prompt('複製以下內容分享到 Instagram：', full);
+    }
+  }
+};
 
 /* ══════════════════════════════════════════
    REBORN
