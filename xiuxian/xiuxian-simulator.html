@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>修仙模擬器 — 問道蒼穹</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink: #0d0a06;
+  --paper: #f5efe0;
+  --gold: #c8960c;
+  --gold-light: #e8b844;
+  --gold-dark: #8a6508;
+  --jade: #2a7a4b;
+  --jade-light: #3ea861;
+  --crimson: #8b1a1a;
+  --crimson-light: #c0392b;
+  --mist: rgba(200,150,12,0.12);
+  --border: rgba(200,150,12,0.35);
+  --card-bg: rgba(255,245,220,0.06);
+  --radius: 12px;
+}
+
+body {
+  font-family: 'PingFang TC', 'Microsoft JhengHei', 'Noto Serif TC', serif;
+  background: radial-gradient(ellipse at top, #1a0e2e 0%, #0d0a1a 40%, #06040e 100%);
+  color: #e8dcc8;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Stars ── */
+.stars {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    radial-gradient(1px 1px at 10% 15%, rgba(255,255,220,.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 25% 70%, rgba(255,255,220,.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 45% 30%, rgba(255,255,220,.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 85%, rgba(255,255,220,.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 75% 20%, rgba(255,255,220,.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 88% 55%, rgba(255,255,220,.5) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 35% 50%, rgba(255,240,180,.6) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 55% 10%, rgba(255,240,180,.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 92% 80%, rgba(255,255,220,.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 18% 90%, rgba(255,255,220,.3) 0%, transparent 100%),
+    radial-gradient(2px 2px at 70% 45%, rgba(255,245,200,.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 5% 40%, rgba(255,255,220,.4) 0%, transparent 100%);
+}
+
+/* ── Wrap ── */
+#wrap {
+  position: relative; z-index: 1;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 28px 16px 80px;
+}
+
+/* ── Hero ── */
+.hero {
+  text-align: center;
+  padding: 52px 20px 40px;
+}
+.hero-seal {
+  display: inline-block;
+  width: 72px; height: 72px;
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold-light));
+  border-radius: 50%;
+  font-size: 36px;
+  line-height: 72px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 32px rgba(200,150,12,.5);
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+.hero h1 {
+  font-size: clamp(28px, 6vw, 52px);
+  font-weight: 900;
+  letter-spacing: 4px;
+  background: linear-gradient(135deg, #fff5cc 20%, var(--gold-light) 60%, #e8dcc8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+.hero-sub {
+  font-size: 15px;
+  color: rgba(232,220,200,.6);
+  letter-spacing: 2px;
+}
+
+/* ── Section ── */
+.panel {
+  background: rgba(255,245,210,0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  margin-bottom: 18px;
+  backdrop-filter: blur(8px);
+  position: relative;
+}
+.panel::before {
+  content: '';
+  position: absolute; top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 40%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-light), transparent);
+}
+.panel-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gold-light);
+  letter-spacing: 3px;
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 10px;
+}
+.panel-title::before, .panel-title::after {
+  content: '◈';
+  font-size: 10px;
+  color: var(--gold-dark);
+}
+
+/* ── Trait Grid ── */
+.trait-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+.trait-card {
+  border: 1px solid rgba(200,150,12,.25);
+  border-radius: 10px;
+  padding: 14px 12px;
+  cursor: pointer;
+  transition: all .2s;
+  background: rgba(255,245,210,.03);
+  position: relative;
+  user-select: none;
+}
+.trait-card:hover {
+  border-color: var(--gold);
+  background: rgba(200,150,12,.08);
+  transform: translateY(-2px);
+}
+.trait-card.selected {
+  border-color: var(--gold-light);
+  background: rgba(200,150,12,.15);
+  box-shadow: 0 0 14px rgba(200,150,12,.3);
+}
+.trait-card.disabled {
+  opacity: .45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.trait-card .tc-icon { font-size: 22px; margin-bottom: 6px; }
+.trait-card .tc-name {
+  font-size: 13px; font-weight: 700;
+  color: var(--gold-light); margin-bottom: 4px; letter-spacing: 1px;
+}
+.trait-card .tc-desc {
+  font-size: 11px; color: rgba(232,220,200,.6); line-height: 1.5;
+}
+.trait-check {
+  position: absolute; top: 8px; right: 8px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: rgba(200,150,12,.2);
+  font-size: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: transparent;
+  transition: all .2s;
+}
+.trait-card.selected .trait-check {
+  background: var(--gold-light);
+  color: #1a0e00;
+}
+
+/* ── Negative Trait Banner ── */
+.neg-banner {
+  background: linear-gradient(135deg, rgba(139,26,26,.25), rgba(139,26,26,.1));
+  border: 1px solid rgba(192,57,43,.4);
+  border-radius: 10px;
+  padding: 16px 18px;
+  display: flex; align-items: center; gap: 14px;
+  animation: fadeIn .4s ease;
+}
+.neg-banner .nb-icon { font-size: 28px; flex-shrink: 0; }
+.neg-banner .nb-name { font-size: 14px; font-weight: 700; color: #e87070; letter-spacing: 2px; margin-bottom: 4px; }
+.neg-banner .nb-desc { font-size: 12px; color: rgba(232,220,200,.6); line-height: 1.5; }
+
+/* ── Begin Button ── */
+.btn-begin {
+  height: auto;
+  width: 100%;
+  padding: 16px;
+  border: 2px solid var(--gold);
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(200,150,12,.2), rgba(200,150,12,.1));
+  color: var(--gold-light);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  cursor: pointer;
+  transition: all .2s;
+  font-family: inherit;
+}
+.btn-begin:hover:not(:disabled) {
+  background: linear-gradient(90deg, rgba(200,150,12,.35), rgba(200,150,12,.2));
+  box-shadow: 0 0 28px rgba(200,150,12,.35);
+  transform: translateY(-2px);
+}
+.btn-begin:disabled {
+  opacity: .4; cursor: not-allowed; border-color: rgba(200,150,12,.3);
+}
+
+/* ── Realm Banner ── */
+.realm-banner {
+  text-align: center;
+  padding: 10px 0 20px;
+}
+.realm-title {
+  font-size: 22px; font-weight: 900;
+  letter-spacing: 3px;
+  color: var(--gold-light);
+}
+.realm-sub { font-size: 13px; color: rgba(232,220,200,.5); letter-spacing: 2px; margin-top: 4px; }
+
+/* ── Indicators ── */
+.indicators {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.ind-card {
+  background: rgba(255,245,210,.04);
+  border: 1px solid rgba(200,150,12,.2);
+  border-radius: 10px;
+  padding: 12px 8px;
+  text-align: center;
+}
+.ind-icon { font-size: 20px; margin-bottom: 6px; }
+.ind-label { font-size: 10px; color: rgba(232,220,200,.55); letter-spacing: 1px; margin-bottom: 7px; }
+.ind-bar-track {
+  height: 6px; background: rgba(255,255,255,.08);
+  border-radius: 3px; overflow: hidden; margin-bottom: 5px;
+}
+.ind-bar-fill {
+  height: 100%; border-radius: 3px;
+  transition: width .6s ease;
+}
+.ind-val { font-size: 14px; font-weight: 700; color: var(--gold-light); }
+
+/* Bar colours by stat */
+.bar-health { background: linear-gradient(90deg, #e55, #f88); }
+.bar-wealth { background: linear-gradient(90deg, #b8860b, var(--gold-light)); }
+.bar-mind   { background: linear-gradient(90deg, #5b8dd9, #82b4f5); }
+.bar-social { background: linear-gradient(90deg, #2a9a5a, #5ed698); }
+.bar-luck   { background: linear-gradient(90deg, #9b59d4, #c084fc); }
+
+/* ── Danger glow ── */
+.ind-card.danger { border-color: rgba(220,50,50,.6); animation: danger-pulse 1s ease-in-out infinite; }
+
+/* ── Event Log ── */
+.event-log {
+  max-height: 320px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 4px;
+}
+.event-log::-webkit-scrollbar { width: 4px; }
+.event-log::-webkit-scrollbar-track { background: rgba(255,255,255,.04); border-radius: 2px; }
+.event-log::-webkit-scrollbar-thumb { background: rgba(200,150,12,.3); border-radius: 2px; }
+
+.event-entry {
+  background: rgba(255,245,210,.04);
+  border-left: 3px solid var(--gold-dark);
+  border-radius: 0 8px 8px 0;
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  animation: slideIn .3s ease;
+}
+.event-entry.death {
+  border-left-color: var(--crimson);
+  background: rgba(139,26,26,.15);
+}
+.event-year {
+  font-size: 11px; color: rgba(200,150,12,.7);
+  font-weight: 700; letter-spacing: 1px; margin-bottom: 3px;
+}
+.event-text { color: #d8ccb8; }
+.event-delta {
+  margin-top: 5px;
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.delta-chip {
+  font-size: 10px; font-weight: 700; border-radius: 10px;
+  padding: 2px 8px;
+}
+.delta-pos { background: rgba(46,160,87,.2); color: #7ee7a0; }
+.delta-neg { background: rgba(200,50,50,.2); color: #f08080; }
+
+/* ── Next Year Button ── */
+.btn-nextyear {
+  height: auto;
+  width: 100%;
+  padding: 14px;
+  border: 1px solid rgba(200,150,12,.4);
+  border-radius: 10px;
+  background: rgba(200,150,12,.12);
+  color: var(--gold-light);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .2s;
+  margin-top: 14px;
+}
+.btn-nextyear:hover {
+  background: rgba(200,150,12,.25);
+  box-shadow: 0 0 20px rgba(200,150,12,.25);
+}
+
+/* ── Death Screen ── */
+.death-screen {
+  text-align: center;
+  padding: 32px 20px;
+}
+.death-screen .ds-age {
+  font-size: 64px; font-weight: 900;
+  background: linear-gradient(135deg, #e87070, #ff4444);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  margin-bottom: 6px;
+}
+.death-screen .ds-label { font-size: 16px; letter-spacing: 3px; color: rgba(232,220,200,.5); margin-bottom: 20px; }
+.death-screen .ds-epitaph {
+  font-size: 14px; color: rgba(232,220,200,.65); line-height: 2; max-width: 440px;
+  margin: 0 auto 24px; letter-spacing: 1px;
+}
+.btn-reborn {
+  height: auto;
+  padding: 14px 40px;
+  border: 2px solid var(--gold);
+  border-radius: 10px;
+  background: rgba(200,150,12,.15);
+  color: var(--gold-light);
+  font-size: 16px; font-weight: 700;
+  letter-spacing: 3px; cursor: pointer;
+  font-family: inherit;
+  transition: all .2s;
+}
+.btn-reborn:hover {
+  background: rgba(200,150,12,.3);
+  box-shadow: 0 0 24px rgba(200,150,12,.4);
+}
+
+/* ── Trait Chips (in-game) ── */
+.trait-chips {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;
+}
+.chip {
+  font-size: 11px; font-weight: 700;
+  border-radius: 20px; padding: 3px 12px;
+  letter-spacing: 1px;
+}
+.chip-pos { background: rgba(200,150,12,.2); border: 1px solid rgba(200,150,12,.4); color: var(--gold-light); }
+.chip-neg { background: rgba(200,50,50,.2); border: 1px solid rgba(200,50,50,.4); color: #f08080; }
+
+/* ── Animations ── */
+@keyframes glow-pulse {
+  0%,100% { box-shadow: 0 0 32px rgba(200,150,12,.45); }
+  50% { box-shadow: 0 0 52px rgba(200,150,12,.75); }
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes danger-pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(220,50,50,.4); }
+  50% { box-shadow: 0 0 0 6px rgba(220,50,50,0); }
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .indicators { grid-template-columns: repeat(3, 1fr); }
+  .trait-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero h1 { font-size: 28px; letter-spacing: 2px; }
+  #wrap { padding: 16px 12px 60px; }
+}
+@media (max-width: 380px) {
+  .indicators { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<div id="wrap">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-seal">☯</div>
+    <h1>修仙模擬器</h1>
+    <p class="hero-sub">— 問道蒼穹，逆天改命 —</p>
+  </div>
+
+  <!-- ═══ SETUP PHASE ═══ -->
+  <div id="phase-setup">
+
+    <!-- Choose Traits -->
+    <div class="panel">
+      <div class="panel-title">天賦選擇　<span style="font-size:12px;color:rgba(232,220,200,.45);letter-spacing:1px;font-weight:400">抽四選二</span></div>
+      <div class="trait-grid" id="trait-grid"></div>
+    </div>
+
+    <!-- Negative Trait Reveal -->
+    <div class="panel" id="neg-panel" style="display:none">
+      <div class="panel-title">宿命烙印　<span style="font-size:12px;color:rgba(232,220,200,.45);letter-spacing:1px;font-weight:400">天命不可違</span></div>
+      <div id="neg-banner-wrap"></div>
+    </div>
+
+    <!-- Begin -->
+    <div class="panel" style="padding:20px 24px">
+      <button class="btn-begin" id="btn-begin" onclick="beginSimulation()" disabled>
+        ☯ 踏入修仙之路
+      </button>
+      <div id="select-hint" style="text-align:center;font-size:12px;color:rgba(232,220,200,.4);margin-top:10px;letter-spacing:2px">
+        尚未選擇兩種天賦
+      </div>
+    </div>
+
+  </div><!-- /phase-setup -->
+
+  <!-- ═══ GAME PHASE ═══ -->
+  <div id="phase-game" style="display:none">
+
+    <!-- Realm + Age -->
+    <div class="panel" id="game-stats-panel">
+      <div class="realm-banner">
+        <div class="realm-title" id="realm-title">凡人境</div>
+        <div class="realm-sub" id="age-display">年歲　零歲</div>
+      </div>
+
+      <!-- Trait chips -->
+      <div class="trait-chips" id="ingame-traits"></div>
+
+      <!-- Stats -->
+      <div class="indicators" id="indicators"></div>
+    </div>
+
+    <!-- Event Log -->
+    <div class="panel">
+      <div class="panel-title">天道行錄</div>
+      <div class="event-log" id="event-log"></div>
+      <button class="btn-nextyear" id="btn-nextyear" onclick="nextYear()">
+        ▶ 渡過一年
+      </button>
+    </div>
+
+  </div><!-- /phase-game -->
+
+  <!-- ═══ DEATH PHASE ═══ -->
+  <div id="phase-death" style="display:none">
+    <div class="panel">
+      <div class="death-screen">
+        <div class="ds-age" id="death-age"></div>
+        <div class="ds-label">歲　壽盡圓寂</div>
+        <div class="ds-epitaph" id="death-epitaph"></div>
+        <button class="btn-reborn" onclick="reborn()">☯ 轉世重修</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<script>
+(function () {
+'use strict';
+
+/* ══════════════════════════════════════════
+   DATA
+══════════════════════════════════════════ */
+
+var POSITIVE_TRAITS = [
+  {
+    id:'tianling', icon:'🌟', name:'天靈根',
+    desc:'靈根純淨，修煉速度倍增，心態每年緩慢回升',
+    mods: { mind:+3, health:+1 }, yearlyBonus: { mind:+2 }
+  },
+  {
+    id:'jianggu', icon:'⚔️', name:'劍骨',
+    desc:'骨骼天生異象，健康上限強韌，受傷事件影響減半',
+    mods: { health:+8 }, yearlyBonus: { health:+1 }, resistHealth: true
+  },
+  {
+    id:'yaoshi', icon:'🌿', name:'藥師之資',
+    desc:'天生對靈藥敏感，可自行調養，健康與財富皆有加持',
+    mods: { health:+4, wealth:+4 }, yearlyBonus: { health:+1, wealth:+1 }
+  },
+  {
+    id:'shangjia', icon:'💰', name:'商賈世家',
+    desc:'家族富甲一方，初始財富豐厚，財富損失事件減緩',
+    mods: { wealth:+15 }, yearlyBonus: { wealth:+2 }, resistWealth: true
+  },
+  {
+    id:'fuxing', icon:'🍀', name:'福星高照',
+    desc:'天生幸運，幸運值偏高，負面事件出現概率略降',
+    mods: { luck:+12 }, yearlyBonus: { luck:+1 }
+  },
+  {
+    id:'jindan', icon:'🔮', name:'金丹體質',
+    desc:'丹田寬廣，心態極佳，心態負面事件影響減半',
+    mods: { mind:+10 }, yearlyBonus: { mind:+1 }, resistMind: true
+  },
+  {
+    id:'guanxing', icon:'🔭', name:'觀星之術',
+    desc:'能感知天機，幸運穩定，偶有預知使幸運不歸零',
+    mods: { luck:+6, mind:+4 }, yearlyBonus: { luck:+1 }, guardLuck: true
+  },
+  {
+    id:'wuxue', icon:'🥋', name:'武學奇才',
+    desc:'悟性超群，健康與社交兼備，習武類事件收益翻倍',
+    mods: { health:+5, social:+5 }, yearlyBonus: { health:+1, social:+1 }
+  },
+  {
+    id:'yinshi', icon:'🏯', name:'隱世仙緣',
+    desc:'與仙道有緣，每年偶有奇遇，社交雖低初始心態更穩',
+    mods: { mind:+6, luck:+5 }, yearlyBonus: { mind:+1, luck:+1 }
+  },
+  {
+    id:'changsheng', icon:'🐢', name:'長生之相',
+    desc:'天命長壽，每年自動恢復少量健康，難以病死',
+    mods: { health:+6 }, yearlyBonus: { health:+3 }
+  }
+];
+
+var NEGATIVE_TRAITS = [
+  {
+    id:'sangong', icon:'💀', name:'散功體',
+    desc:'修煉所得每年流逝，心態不穩定',
+    yearlyPenalty: { mind:-5 }
+  },
+  {
+    id:'yezhang', icon:'🔥', name:'業障纏身',
+    desc:'業力沉重，財富難留。',
+    yearlyPenalty: { wealth:-3, luck:-3 }
+  },
+  {
+    id:'tianshuguxa', icon:'⚡', name:'天煞孤星',
+    desc:'與人相剋，注定孤獨，運勢不佳',
+    yearlyPenalty: { social:-3, luck:-3 }
+  },
+  {
+    id:'duanming', icon:'⏳', name:'短命相',
+    desc:'壽元不足，健康堪憂',
+    yearlyPenalty: { health:-5 }
+  },
+  {
+    id:'caibo', icon:'💸', name:'財帛散盡',
+    desc:'財運極差，運勢普普',
+    yearlyPenalty: { wealth:-4, luck:-2 }
+  }
+];
+
+/* ── Events ── */
+var EVENTS = [
+  /* Health */
+  { id:'illness',    text:'染上時疫，臥床月餘。',                  mods:{ health:-12, wealth:-5 } },
+  { id:'wound',      text:'歷經一場惡戰，負傷而歸。',              mods:{ health:-8, mind:-3 },  tag:'combat' },
+  { id:'herb',       text:'於山林間尋得珍貴靈草，服用後精神大振。', mods:{ health:+10, mind:+5 } },
+  { id:'meditate',   text:'靜坐悟道七日，元氣大增。',               mods:{ health:+6, mind:+8 } },
+  { id:'hungry',     text:'遭遇饑荒，糧食匱乏，身體虛弱。',          mods:{ health:-7, wealth:-8 } },
+  { id:'exercise',   text:'每日晨練，體魄漸強。',                   mods:{ health:+5 } },
+  { id:'poison',     text:'誤踏禁地，中了輕微毒素。',               mods:{ health:-10, luck:-3 } },
+  { id:'recovery',   text:'得遇神醫，沉痾盡消。',                   mods:{ health:+14 } },
+
+  /* Wealth */
+  { id:'business',   text:'以靈材交換，做成一筆大買賣。',           mods:{ wealth:+18, social:+3 } },
+  { id:'robbery',    text:'夜行遭劫，金銀盡失。',                   mods:{ wealth:-15, luck:-2 } },
+  { id:'invest',     text:'投資靈田，今年豐收喜人。',               mods:{ wealth:+12 } },
+  { id:'gamble',     text:'一時興起賭術，勝負難料，略有損失。',       mods:{ wealth:-8, luck:+2 } },
+  { id:'treasure',   text:'偶遇前人留下的藏寶圖，得一筆橫財。',     mods:{ wealth:+22, luck:+3 } },
+  { id:'tax',        text:'宗門收繳靈石代管費，荷包縮水。',          mods:{ wealth:-6 } },
+  { id:'donation',   text:'慷慨解囊助人，聲望大漲。',               mods:{ wealth:-5, social:+10 } },
+
+  /* Mind */
+  { id:'enlighten',  text:'道心突破，感悟天地至理。',               mods:{ mind:+15, luck:+3 } },
+  { id:'betrayal',   text:'摯友背叛，道心受挫，難以平復。',          mods:{ mind:-12, social:-8 } },
+  { id:'failure',    text:'修煉出偏，心魔入侵。',                   mods:{ mind:-10, health:-4 } },
+  { id:'book',       text:'閉關苦讀秘籍，心境開闊。',              mods:{ mind:+8 } },
+  { id:'loss',       text:'痛失至親，悲痛難耐。',                   mods:{ mind:-9, social:-4 } },
+  { id:'insight',    text:'觀落日雲霞，忽有所悟。',                  mods:{ mind:+6, luck:+2 } },
+  { id:'nightmare',  text:'夜夢魔境，輾轉難眠，精神衰弱。',          mods:{ mind:-6, health:-3 } },
+
+  /* Social */
+  { id:'newFriend',  text:'結識一位志同道合的道友，引為知己。',       mods:{ social:+12, mind:+4 } },
+  { id:'conflict',   text:'與宗門師兄起衝突，關係鬧僵。',            mods:{ social:-10, mind:-3 } },
+  { id:'fame',       text:'在比試中大放異彩，名聲傳揚四方。',         mods:{ social:+14, luck:+3 } },
+  { id:'isolation',  text:'一心修煉，疏遠眾人，逐漸孤立。',          mods:{ social:-7 } },
+  { id:'banquet',    text:'受邀赴宴，廣結善緣。',                   mods:{ social:+8, wealth:+3 } },
+  { id:'slander',    text:'遭人誣陷，聲譽受損。',                   mods:{ social:-9, mind:-5 } },
+
+  /* Luck */
+  { id:'windfall',   text:'天降靈寶，幸從天降。',                   mods:{ luck:+10, wealth:+8 } },
+  { id:'mishap',     text:'連連走背，諸事不順。',                   mods:{ luck:-10, mind:-3 } },
+  { id:'omen',       text:'夜觀星象，感知吉兆將至。',               mods:{ luck:+7 } },
+  { id:'curse',      text:'誤觸古陣，遭受詛咒，霉運纏身。',          mods:{ luck:-12, health:-4 } },
+  { id:'serendipity',text:'偶然踏入秘境，因緣際會得一奇遇。',        mods:{ luck:+8, mind:+5, health:+3 } },
+  { id:'mundane',    text:'平淡度日，無甚波瀾。',                   mods:{} },
+  { id:'mundane2',   text:'修煉如常，時光靜靜流逝。',               mods:{} },
+  { id:'mundane3',   text:'宗門事務繁忙，奔波勞碌。',              mods:{ health:-2, wealth:+3 } }
+];
+
+/* ── Realm Thresholds (by age) ── */
+var REALMS = [
+  { age:0,   name:'凡人境',   colour:'#c8c8b8' },
+  { age:15,  name:'煉氣期',   colour:'#82b4f5' },
+  { age:40,  name:'築基期',   colour:'#7ee7a0' },
+  { age:80,  name:'金丹期',   colour:'#fbbf24' },
+  { age:150, name:'元嬰期',   colour:'#c084fc' },
+  { age:300, name:'化神期',   colour:'#f08080' },
+  { age:500, name:'合體期',   colour:'#e8dcc8' },
+  { age:800, name:'大乘期',   colour:'#ffffff' },
+  { age:1200,name:'渡劫期',  colour:'#ffd700' },
+  { age:2000,name:'仙人境',   colour:'#ffe9a8' }
+];
+
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+var state = {
+  selectedTraits: [],
+  negativeTrait: null,
+  age: 0,
+  stats: { health:50, wealth:50, mind:50, social:50, luck:50 },
+  alive: true,
+  lastEventText: ''
+};
+
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
+function init() {
+  renderTraitGrid();
+}
+
+function renderTraitGrid() {
+  var shuffled = POSITIVE_TRAITS.slice().sort(function() { return Math.random() - 0.5; });
+  var pool = shuffled.slice(0, 4);
+  var grid = document.getElementById('trait-grid');
+  grid.innerHTML = pool.map(function(t) {
+    return '<div class="trait-card" id="tc-'+t.id+'" onclick="toggleTrait(&quot;'+t.id+'&quot;)">'
+         + '<div class="trait-check">✓</div>'
+         + '<div class="tc-icon">'+t.icon+'</div>'
+         + '<div class="tc-name">'+t.name+'</div>'
+         + '<div class="tc-desc">'+t.desc+'</div>'
+         + '</div>';
+  }).join('');
+}
+
+/* ══════════════════════════════════════════
+   TRAIT SELECTION
+══════════════════════════════════════════ */
+window.toggleTrait = function(id) {
+  var idx = state.selectedTraits.indexOf(id);
+  if (idx !== -1) {
+    state.selectedTraits.splice(idx, 1);
+  } else {
+    if (state.selectedTraits.length >= 2) return;
+    state.selectedTraits.push(id);
+  }
+  updateTraitUI();
+};
+
+function updateTraitUI() {
+  POSITIVE_TRAITS.forEach(function(t) {
+    var el = document.getElementById('tc-'+t.id);
+    if (!el) return;
+    var sel = state.selectedTraits.indexOf(t.id) !== -1;
+    el.classList.toggle('selected', sel);
+    el.classList.toggle('disabled', !sel && state.selectedTraits.length >= 2);
+  });
+
+  var count = state.selectedTraits.length;
+  var hint  = document.getElementById('select-hint');
+  var btn   = document.getElementById('btn-begin');
+
+  if (count < 2) {
+    hint.textContent = '已選 '+count+' / 2 種天賦，還需選擇 '+(2-count)+' 種';
+    btn.disabled = true;
+    document.getElementById('neg-panel').style.display = 'none';
+    state.negativeTrait = null;
+  } else {
+    hint.textContent = '天賦已選定，命運之輪即將轉動……';
+    btn.disabled = false;
+    // Reveal negative trait
+    revealNegativeTrait();
+  }
+}
+
+function revealNegativeTrait() {
+  var neg = NEGATIVE_TRAITS[Math.floor(Math.random() * NEGATIVE_TRAITS.length)];
+  state.negativeTrait = neg;
+  var wrap = document.getElementById('neg-banner-wrap');
+  wrap.innerHTML =
+    '<div class="neg-banner">'
+    + '<div class="nb-icon">'+neg.icon+'</div>'
+    + '<div><div class="nb-name">'+neg.name+'</div>'
+    + '<div class="nb-desc">'+neg.desc+'</div></div>'
+    + '</div>';
+  document.getElementById('neg-panel').style.display = 'block';
+}
+
+/* ══════════════════════════════════════════
+   BEGIN
+══════════════════════════════════════════ */
+window.beginSimulation = function() {
+  // Apply trait initial mods
+  state.age = 0;
+  state.stats = { health:50, wealth:50, mind:50, social:50, luck:50 };
+  state.alive = true;
+
+  state.selectedTraits.forEach(function(id) {
+    var t = POSITIVE_TRAITS.find(function(x){ return x.id === id; });
+    if (!t) return;
+    applyDelta(state.stats, t.mods || {});
+  });
+
+  clampStats();
+  state.lastEventText = '';
+
+  document.getElementById('phase-setup').style.display = 'none';
+  document.getElementById('phase-game').style.display = 'block';
+  document.getElementById('game-stats-panel').style.display = 'block';
+  document.getElementById('btn-nextyear').style.display = 'block';
+
+  renderIngameTraits();
+  renderIndicators();
+  updateRealm();
+
+  var log = document.getElementById('event-log');
+  log.innerHTML = '';
+  appendLogEntry(0, '道途伊始，天地為證。你踏上了修仙之路。', {}, false);
+};
+
+/* ══════════════════════════════════════════
+   YEAR SIMULATION
+══════════════════════════════════════════ */
+window.nextYear = function() {
+  if (!state.alive) return;
+
+  var yearsPassed = Math.floor(Math.random() * 3) + 2; // 2~4
+  state.age += yearsPassed;
+
+  // 1) Apply positive trait yearly bonuses
+  state.selectedTraits.forEach(function(id) {
+    var t = POSITIVE_TRAITS.find(function(x){ return x.id === id; });
+    if (t && t.yearlyBonus) applyDelta(state.stats, t.yearlyBonus);
+  });
+
+  // 2) Apply negative trait yearly penalty
+  if (state.negativeTrait && state.negativeTrait.yearlyPenalty) {
+    applyDelta(state.stats, state.negativeTrait.yearlyPenalty);
+  }
+
+  // 3) Pick and apply a random event
+  var event = pickEvent();
+  state.lastEventText = event.text;
+  var rawMods = Object.assign({}, event.mods);
+  var finalMods = applyTraitModifiers(rawMods);
+  applyDelta(state.stats, finalMods);
+
+  clampStats();
+
+  // 4) Render
+  renderIndicators();
+  updateRealm();
+  appendLogEntry(state.age, event.text, finalMods, false);
+
+  // 5) Auto-scroll log
+  var log = document.getElementById('event-log');
+  log.scrollTop = log.scrollHeight;
+
+  // 6) Death check
+  var dead = checkDeath();
+  if (dead) {
+    triggerDeath(dead);
+  }
+};
+
+function pickEvent() {
+  // Slightly weight towards neutral if luck is high
+  var pool = EVENTS.slice();
+  var bonus = Math.floor((state.stats.luck - 50) / 20); // -2..+2
+  // Weight positive events more with higher luck
+  if (bonus > 0) {
+    var good = EVENTS.filter(function(e) {
+      var sum = Object.values(e.mods).reduce(function(a,b){return a+b;}, 0);
+      return sum > 0;
+    });
+    for (var i=0; i<bonus; i++) pool = pool.concat(good);
+  } else if (bonus < 0) {
+    var bad = EVENTS.filter(function(e) {
+      var sum = Object.values(e.mods).reduce(function(a,b){return a+b;}, 0);
+      return sum < 0;
+    });
+    for (var i=0; i>bonus; i--) pool = pool.concat(bad);
+  }
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function applyTraitModifiers(mods) {
+  var out = Object.assign({}, mods);
+  state.selectedTraits.forEach(function(id) {
+    var t = POSITIVE_TRAITS.find(function(x){ return x.id === id; });
+    if (!t) return;
+    if (out.health < 0) out.health = Math.ceil(out.health / 2);
+    if (out.wealth < 0) out.wealth = Math.ceil(out.wealth / 2);
+    if (out.mind   < 0) out.mind   = Math.ceil(out.mind   / 2);
+    if (t.guardLuck) {
+      if (state.stats.luck + (out.luck || 0) <= 0) out.luck = (out.luck || 0) + 5;
+    }
+  });
+  return out;
+}
+
+function applyDelta(stats, mods) {
+  Object.keys(mods).forEach(function(k) {
+    if (stats[k] !== undefined) stats[k] += mods[k];
+  });
+}
+
+function clampStats() {
+  Object.keys(state.stats).forEach(function(k) {
+    state.stats[k] = Math.min(100, Math.max(0, state.stats[k]));
+  });
+}
+
+function checkDeath() {
+  var s = state.stats;
+  if (s.health <= 0) return '健康歸零，油盡燈枯';
+  if (s.wealth <= 0) return '財帛散盡，流落街頭，鬱鬱而終';
+  if (s.mind   <= 0) return '道心崩潰，走火入魔，形神俱滅';
+  if (s.social <= 0) return '孤立無援，與世隔絕，獨自消逝';
+  if (s.luck   <= 0) return '氣運耗盡，天命終結';
+  return null;
+}
+
+/* ══════════════════════════════════════════
+   DEATH
+══════════════════════════════════════════ */
+function triggerDeath(reason) {
+  state.alive = false;
+  document.getElementById('btn-nextyear').disabled = true;
+
+  appendLogEntry(state.age, '☠ ' + reason + '。', {}, true);
+
+  var log = document.getElementById('event-log');
+  log.scrollTop = log.scrollHeight;
+
+  setTimeout(function() {
+    document.getElementById('game-stats-panel').style.display = 'none';
+    document.getElementById('btn-nextyear').style.display = 'none';
+    document.getElementById('phase-death').style.display = 'block';
+
+    document.getElementById('death-age').textContent = state.age;
+    document.getElementById('death-epitaph').innerHTML = buildEpitaph(reason);
+
+    document.getElementById('phase-death').scrollIntoView({ behavior:'smooth', block:'start' });
+  }, 900);
+}
+
+function buildEpitaph(reason) {
+  var realm = getCurrentRealm().name;
+  var traits = state.selectedTraits.map(function(id) {
+    var t = POSITIVE_TRAITS.find(function(x){ return x.id === id; });
+    return t ? t.name : id;
+  }).join('、');
+  var neg = state.negativeTrait ? state.negativeTrait.name : '';
+  return '此修士享年 <strong>'+state.age+' 歲</strong>，止步於 <strong>'+realm+'</strong>，'
+    + '身懷天賦【'+traits+'】，'
+    + (neg ? '然宿命烙印【'+neg+'】終究如影隨形，' : '')
+    + '因 <strong>'+reason+'</strong> 而隕落。<br><br>'
+    + (state.lastEventText ? '<em>臨終之際——「'+state.lastEventText+'」</em><br><br>' : '')
+    + '「道可道，非常道。」';
+}
+
+/* ══════════════════════════════════════════
+   REBORN
+══════════════════════════════════════════ */
+window.reborn = function() {
+  state.selectedTraits = [];
+  state.negativeTrait = null;
+  state.age = 0;
+  state.stats = { health:50, wealth:50, mind:50, social:50, luck:50 };
+  state.alive = true;
+  state.lastEventText = '';
+
+  document.getElementById('phase-death').style.display = 'none';
+  document.getElementById('phase-game').style.display = 'none';
+  document.getElementById('game-stats-panel').style.display = 'block';
+  document.getElementById('btn-nextyear').style.display = 'block';
+  document.getElementById('phase-setup').style.display = 'block';
+
+  // Reset trait cards
+  POSITIVE_TRAITS.forEach(function(t) {
+    var el = document.getElementById('tc-'+t.id);
+    if (el) { el.classList.remove('selected','disabled'); }
+  });
+  document.getElementById('neg-panel').style.display = 'none';
+  document.getElementById('btn-begin').disabled = true;
+  document.getElementById('select-hint').textContent = '尚未選擇三種天賦';
+  document.getElementById('ingame-traits').innerHTML = '';
+  document.getElementById('event-log').innerHTML = '';
+  document.getElementById('btn-nextyear').disabled = false;
+
+  document.getElementById('phase-setup').scrollIntoView({ behavior:'smooth', block:'start' });
+};
+
+/* ══════════════════════════════════════════
+   RENDER HELPERS
+══════════════════════════════════════════ */
+var statConf = [
+  { key:'health', icon:'❤️', label:'健康', barCls:'bar-health' },
+  { key:'wealth', icon:'💰', label:'財富', barCls:'bar-wealth' },
+  { key:'mind',   icon:'🧘', label:'心態', barCls:'bar-mind'   },
+  { key:'social', icon:'🤝', label:'社交', barCls:'bar-social' },
+  { key:'luck',   icon:'🍀', label:'幸運', barCls:'bar-luck'   }
+];
+
+function renderIndicators() {
+  var wrap = document.getElementById('indicators');
+  wrap.innerHTML = statConf.map(function(sc) {
+    var val = Math.round(state.stats[sc.key]);
+    var danger = val <= 15;
+    return '<div class="ind-card'+(danger?' danger':'')+'">'
+         + '<div class="ind-icon">'+sc.icon+'</div>'
+         + '<div class="ind-label">'+sc.label+'</div>'
+         + '<div class="ind-bar-track">'
+         + '<div class="ind-bar-fill '+sc.barCls+'" style="width:'+val+'%"></div>'
+         + '</div>'
+         + '<div class="ind-val">'+val+'</div>'
+         + '</div>';
+  }).join('');
+}
+
+function getCurrentRealm() {
+  var realm = REALMS[0];
+  for (var i=0; i<REALMS.length; i++) {
+    if (state.age >= REALMS[i].age) realm = REALMS[i];
+  }
+  return realm;
+}
+
+function updateRealm() {
+  var r = getCurrentRealm();
+  var rt = document.getElementById('realm-title');
+  rt.textContent = r.name;
+  rt.style.color = r.colour;
+  document.getElementById('age-display').textContent = '年歲　' + chineseAge(state.age);
+}
+
+function chineseAge(n) {
+  if (n === 0) return '零歲';
+  return n + ' 歲';
+}
+
+function renderIngameTraits() {
+  var wrap = document.getElementById('ingame-traits');
+  var html = state.selectedTraits.map(function(id) {
+    var t = POSITIVE_TRAITS.find(function(x){ return x.id === id; });
+    return t ? '<span class="chip chip-pos">'+t.icon+' '+t.name+'</span>' : '';
+  }).join('');
+  if (state.negativeTrait) {
+    html += '<span class="chip chip-neg">'+state.negativeTrait.icon+' '+state.negativeTrait.name+'</span>';
+  }
+  wrap.innerHTML = html;
+}
+
+function appendLogEntry(age, text, mods, isDeath) {
+  var log = document.getElementById('event-log');
+  var div = document.createElement('div');
+  div.className = 'event-entry' + (isDeath ? ' death' : '');
+  var ageLabel = age === 0 ? '起源' : age + ' 歲';
+  var deltaHtml = '';
+  Object.keys(mods).forEach(function(k) {
+    var v = Math.round(mods[k]);
+    if (v === 0) return;
+    var conf = statConf.find(function(sc){ return sc.key===k; });
+    var label = conf ? conf.label : k;
+    deltaHtml += '<span class="delta-chip '+(v>0?'delta-pos':'delta-neg')+'">'
+               + label + (v>0?'+':'')+v+'</span>';
+  });
+  div.innerHTML =
+    '<div class="event-year">'+ageLabel+'</div>'
+    + '<div class="event-text">'+text+'</div>'
+    + (deltaHtml ? '<div class="event-delta">'+deltaHtml+'</div>' : '');
+  log.appendChild(div);
+}
+
+/* ══════════════════════════════════════════
+   BOOT
+══════════════════════════════════════════ */
+init();
+
+})();
+</script>
+</body>
+</html>
