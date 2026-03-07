@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>人生模擬器 - 預見你的未來可能性</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue-dark: #0a0e27;
+    --blue-mid: #1a1f4e;
+    --blue-bright: #2563eb;
+    --blue-light: #3b82f6;
+    --gold: #f59e0b;
+    --gold-light: #fbbf24;
+    --gold-dark: #d97706;
+    --gray-card: #374151;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --card-bg: rgba(255,255,255,0.05);
+    --card-border: rgba(255,255,255,0.1);
+    --radius: 16px;
+    --shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+    background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 40%, #0f2460 70%, #0a1628 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Stars background ── */
+  #lsim-wrap {
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+  }
+
+  .stars {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0;
+    background-image:
+      radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 60% 10%, rgba(255,255,255,.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 80% 60%, rgba(255,255,255,.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 40%, rgba(255,255,255,.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 10% 70%, rgba(255,255,255,.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 50% 50%, rgba(255,255,255,.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 75% 20%, rgba(255,255,255,.5) 0%, transparent 100%);
+  }
+
+  /* ── Hero ── */
+  .hero {
+    position: relative; z-index: 1;
+    text-align: center;
+    padding: 48px 20px 36px;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: linear-gradient(90deg, var(--blue-bright), var(--gold));
+    border-radius: 20px;
+    padding: 4px 16px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .hero h1 {
+    font-size: clamp(26px, 5vw, 44px);
+    font-weight: 800;
+    line-height: 1.2;
+    background: linear-gradient(90deg, #ffffff 30%, var(--gold-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+  .hero p {
+    color: var(--text-secondary);
+    font-size: 16px;
+    max-width: 540px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  /* ── Section wrapper ── */
+  .section {
+    position: relative; z-index: 1;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(12px);
+  }
+  .section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gold-light);
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 4px; height: 18px;
+    background: linear-gradient(180deg, var(--blue-light), var(--gold));
+    border-radius: 2px;
+  }
+
+  /* ── Form Grid ── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 8px; }
+  .form-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  .form-input {
+    height: auto;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    color: var(--text-primary);
+    padding: 10px 14px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .form-input:focus {
+    border-color: var(--blue-light);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.25);
+  }
+  select.form-input {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+    cursor: pointer;
+  }
+  select.form-input option { background: #1a1f4e; }
+
+  /* ── Slider ── */
+  .slider-row { display: flex; align-items: center; gap: 12px; }
+  input[type=range] {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.15);
+    outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue-light), var(--blue-bright));
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(59,130,246,0.5);
+    transition: transform .15s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+  .slider-val {
+    min-width: 44px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--blue-light);
+  }
+
+  /* ── Scenario Cards ── */
+  .scenario-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+  }
+  .scenario-card {
+    border-radius: 14px;
+    padding: 20px 18px;
+    cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+  }
+  .scenario-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    opacity: 0;
+    transition: opacity .3s;
+    border-radius: 12px;
+  }
+  .scenario-card:hover { transform: translateY(-4px); }
+  .scenario-card.active { border-width: 2px; }
+
+  .scenario-gray { background: linear-gradient(135deg, #374151, #4b5563); }
+  .scenario-gray.active { border-color: #9ca3af; box-shadow: 0 0 20px rgba(156,163,175,.35); }
+  .scenario-gray:hover { box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+
+  .scenario-blue { background: linear-gradient(135deg, #1e3a8a, #2563eb); }
+  .scenario-blue.active { border-color: var(--blue-light); box-shadow: 0 0 20px rgba(59,130,246,.35); }
+  .scenario-blue:hover { box-shadow: 0 8px 24px rgba(37,99,235,.4); }
+
+  .scenario-gold { background: linear-gradient(135deg, #78350f, #d97706); }
+  .scenario-gold.active { border-color: var(--gold-light); box-shadow: 0 0 20px rgba(245,158,11,.4); }
+  .scenario-gold:hover { box-shadow: 0 8px 24px rgba(217,119,6,.4); }
+
+  .scenario-icon { font-size: 28px; margin-bottom: 10px; }
+  .scenario-name { font-size: 14px; font-weight: 700; margin-bottom: 6px; color: var(--text-primary);}
+  .scenario-desc { font-size: 12px; color: rgba(255,255,255,.7); line-height: 1.5; }
+  .scenario-amount {
+    font-size: 22px; font-weight: 800; margin-top: 10px;
+    background: linear-gradient(90deg, #fff, rgba(255,255,255,.8));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .scenario-check {
+    position: absolute; top: 12px; right: 12px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(255,255,255,.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; transition: background .2s;
+  }
+  .scenario-card.active .scenario-check { background: rgba(255,255,255,.9); color: #1e1e1e; }
+
+  /* ── Simulate Button ── */
+  .btn-simulate {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(90deg, var(--blue-bright), #6d28d9);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    position: relative; z-index: 1;
+    overflow: hidden;
+    letter-spacing: 1px;
+    transition: transform .15s, box-shadow .2s;
+    box-shadow: 0 4px 20px rgba(37,99,235,.4);
+    height: auto;
+  }
+  .btn-simulate::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+    transform: translateX(-100%);
+    transition: transform .5s;
+  }
+  .btn-simulate:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(37,99,235,.55); }
+  .btn-simulate:hover::after { transform: translateX(100%); }
+  .btn-simulate:active { transform: translateY(0); }
+
+  /* ── Progress Bar ── */
+  .progress-wrap {
+    display: none;
+    margin-top: 16px;
+  }
+  .progress-label {
+    font-size: 13px; color: var(--text-secondary);
+    margin-bottom: 6px;
+    display: flex; justify-content: space-between;
+  }
+  .progress-track {
+    height: 8px; background: rgba(255,255,255,.1);
+    border-radius: 4px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue-bright), var(--gold));
+    border-radius: 4px;
+    width: 0%;
+    transition: width .4s ease;
+  }
+
+  /* ── Results ── */
+  #results-section { display: none; }
+
+  .results-header {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+    margin-bottom: 24px;
+  }
+  .results-title {
+    font-size: 20px; font-weight: 800;
+  }
+  .badge-scenario {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .badge-gray { background: rgba(156,163,175,.25); color: #d1d5db; }
+  .badge-blue { background: rgba(59,130,246,.25); color: #93c5fd; }
+  .badge-gold { background: rgba(245,158,11,.25); color: var(--gold-light); }
+
+  /* ── Timeline ── */
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .tl-node {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    position: relative;
+    transition: transform .2s, border-color .2s;
+    cursor: default;
+  }
+  .tl-node:hover { transform: translateY(-3px); border-color: var(--blue-light); }
+  .tl-period {
+    font-size: 11px; color: var(--text-secondary);
+    margin-bottom: 6px; font-weight: 600; letter-spacing: 1px;
+  }
+  .tl-income {
+    font-size: 18px; font-weight: 800; color: var(--gold-light);
+    margin-bottom: 4px;
+  }
+  .tl-growth {
+    font-size: 11px; border-radius: 10px;
+    padding: 2px 8px; display: inline-block;
+    font-weight: 600;
+  }
+  .tl-growth.up { background: rgba(34,197,94,.2); color: #86efac; }
+  .tl-growth.same { background: rgba(156,163,175,.2); color: #d1d5db; }
+
+  /* ── Chart ── */
+  .chart-wrap { margin-bottom: 24px; }
+  .chart-title { font-size: 14px; color: var(--text-secondary); margin-bottom: 12px; font-weight: 600; }
+  .chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 140px;
+    padding: 0 4px;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+  }
+  .chart-bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    gap: 4px;
+  }
+  .chart-bar {
+    width: 100%;
+    border-radius: 6px 6px 0 0;
+    background: linear-gradient(180deg, var(--blue-light), var(--blue-bright));
+    min-height: 6px;
+    transition: height .8s cubic-bezier(.34,1.56,.64,1);
+    position: relative;
+    overflow: visible;
+  }
+  .chart-bar.gold-bar {
+    background: linear-gradient(180deg, var(--gold-light), var(--gold-dark));
+  }
+  .chart-bar-label {
+    font-size: 10px; color: var(--text-secondary);
+    text-align: center;
+    margin-top: 6px;
+  }
+
+  /* ── Quality Indicators ── */
+  .quality-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .quality-card {
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 12px;
+    padding: 16px 14px;
+    text-align: center;
+    transition: border-color .2s;
+  }
+  .quality-card:hover { border-color: var(--blue-light); }
+  .quality-icon { font-size: 24px; margin-bottom: 6px; }
+  .quality-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+  .quality-bar-track {
+    height: 6px; background: rgba(255,255,255,.1);
+    border-radius: 3px; overflow: hidden; margin-bottom: 6px;
+  }
+  .quality-bar-fill {
+    height: 100%; border-radius: 3px;
+    transition: width 1s ease;
+    background: linear-gradient(90deg, var(--blue-light), var(--gold));
+  }
+  .quality-val { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+
+  /* ── Special Metrics ── */
+  .metrics-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .metric-card {
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .metric-card::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 0 0 14px 14px;
+  }
+  .mc-blue { background: linear-gradient(135deg, rgba(37,99,235,.2), rgba(59,130,246,.1)); }
+  .mc-blue::after { background: linear-gradient(90deg, var(--blue-bright), var(--blue-light)); }
+  .mc-gold { background: linear-gradient(135deg, rgba(217,119,6,.2), rgba(245,158,11,.1)); }
+  .mc-gold::after { background: linear-gradient(90deg, var(--gold-dark), var(--gold-light)); }
+  .metric-icon { font-size: 32px; margin-bottom: 8px; }
+  .metric-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; }
+  .metric-value { font-size: 26px; font-weight: 800; }
+  .mc-blue .metric-value { color: var(--blue-light); }
+  .mc-gold .metric-value { color: var(--gold-light); }
+  .metric-sub { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+
+  /* ── Suggestion Box ── */
+  .suggestion-box {
+    background: linear-gradient(135deg, rgba(37,99,235,.15), rgba(217,119,6,.1));
+    border: 1px solid rgba(245,158,11,.25);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 24px;
+    line-height: 1.8;
+  }
+  .suggestion-box h3 {
+    font-size: 15px; font-weight: 700;
+    color: var(--gold-light);
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .suggestion-box p { font-size: 14px; color: var(--text-secondary); }
+  .suggestion-box strong { color: var(--text-primary); }
+
+  /* ── Special Buttons ── */
+  .special-btns {
+    display: flex; flex-wrap: wrap; gap: 12px;
+    margin-bottom: 24px;
+  }
+  .btn-special {
+    flex: 1;
+    min-width: 160px;
+    padding: 13px 18px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: transform .15s, box-shadow .2s;
+    letter-spacing: .5px;
+  }
+  .btn-special:hover { transform: translateY(-2px); }
+  .btn-special:active { transform: translateY(0); }
+
+  .btn-weekend {
+    background: linear-gradient(90deg, #0f766e, #0d9488);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(13,148,136,.3);
+  }
+  .btn-weekend:hover { box-shadow: 0 6px 20px rgba(13,148,136,.4); }
+
+  .btn-antislave {
+    background: linear-gradient(90deg, #7c3aed, #a855f7);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(124,58,237,.3);
+  }
+  .btn-antislave:hover { box-shadow: 0 6px 20px rgba(124,58,237,.4); }
+
+  .btn-share {
+    background: linear-gradient(90deg, #0369a1, #0284c7);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(3,105,161,.3);
+  }
+  .btn-share:hover { box-shadow: 0 6px 20px rgba(3,105,161,.4); }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,.75);
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    animation: fadeIn .2s ease;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: linear-gradient(135deg, #1a1f4e, #0f2460);
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 20px;
+    padding: 32px 28px;
+    width: min(480px, 90vw);
+    position: relative;
+    animation: slideUp .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  .modal-close {
+    position: absolute; top: 16px; right: 16px;
+    background: rgba(255,255,255,.1); border: none; color: #fff;
+    width: 30px; height: 30px; border-radius: 50%;
+    cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s;
+  }
+  .modal-close:hover { background: rgba(255,255,255,.2); }
+  .modal-title { font-size: 20px; font-weight: 800; margin-bottom: 8px; color: var(--gold-light); }
+  .modal-sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; }
+  .modal-score {
+    font-size: 64px; font-weight: 900; text-align: center;
+    background: linear-gradient(90deg, var(--blue-light), var(--gold-light));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin: 16px 0;
+  }
+  .modal-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.8; }
+  .antislave-breakdown { margin-top: 16px; }
+  .ab-row {
+    display: flex; justify-content: space-between;
+    padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,.07);
+    font-size: 13px;
+  }
+  .ab-row:last-child { border-bottom: none; }
+  .ab-row-label { color: var(--text-secondary); }
+  .ab-row-val { font-weight: 700; color: var(--text-primary); }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(90deg, var(--blue-bright), #6d28d9);
+    color: #fff; padding: 12px 24px;
+    border-radius: 24px; font-size: 14px; font-weight: 600;
+    box-shadow: var(--shadow);
+    display: none; z-index: 10000;
+    animation: slideUp .3s ease;
+    white-space: nowrap;
+  }
+
+  /* ── Animations ── */
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,.4); }
+    50% { box-shadow: 0 0 0 10px rgba(245,158,11,0); }
+  }
+  .pulse-gold { animation: pulse 2s infinite; }
+
+  @keyframes countUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .animate-in { animation: countUp .5s ease forwards; }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .timeline { grid-template-columns: repeat(2, 1fr); }
+    .hero h1 { font-size: 26px; }
+    .special-btns { flex-direction: column; }
+    #lsim-wrap { padding: 16px 12px 48px; }
+  }
+</style>
+</head>
+<body>
+<div class="stars"></div>
+
+<div id="lsim-wrap">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-badge">✦ AI 人生模擬器 2026 ✦</div>
+    <h1>人生模擬器<br>預見你的未來可能性</h1>
+    <p>輸入你目前的生活條件，模擬不同收入策略下的 5 年人生軌跡</p>
+  </div>
+
+  <!-- Step 1: Input -->
+  <div class="section">
+    <div class="section-title">個人資料設定</div>
+    <div class="form-grid">
+
+      <!-- Age -->
+      <div class="form-group" style="grid-column: 1 / -1;">
+        <label class="form-label">目前年齡</label>
+        <div class="slider-row">
+          <input type="range" id="age-slider" min="18" max="70" value="28"
+                 oninput="document.getElementById('age-val').textContent=this.value">
+          <span class="slider-val" id="age-val">28</span>
+          <span class="form-label">歲</span>
+        </div>
+      </div>
+
+      <!-- Occupation -->
+      <div class="form-group">
+        <label class="form-label">職業</label>
+        <select class="form-input" id="occupation">
+          <option value="engineer">工程師</option>
+          <option value="designer">設計師</option>
+          <option value="teacher">教師</option>
+          <option value="sales">業務</option>
+          <option value="student">學生</option>
+          <option value="retired">退休人士</option>
+          <option value="other">其他</option>
+        </select>
+      </div>
+
+      <!-- Income -->
+      <div class="form-group">
+        <label class="form-label">月收入（新台幣）</label>
+        <input type="number" class="form-input" id="income"
+               placeholder="例如：45000" min="0" max="9999999" value="45000">
+      </div>
+
+      <!-- Family -->
+      <div class="form-group">
+        <label class="form-label">家庭狀況</label>
+        <select class="form-input" id="family">
+          <option value="single">單身</option>
+          <option value="married">已婚</option>
+          <option value="kids">已婚且有小孩</option>
+        </select>
+      </div>
+
+      <!-- City -->
+      <div class="form-group">
+        <label class="form-label">所在城市</label>
+        <select class="form-input" id="city">
+          <option value="taipei">台北市</option>
+          <option value="newtaipei">新北市</option>
+          <option value="taichung">台中市</option>
+          <option value="kaohsiung">高雄市</option>
+          <option value="tainan">台南市</option>
+          <option value="other">其他縣市</option>
+        </select>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Step 2: Scenario -->
+  <div class="section">
+    <div class="section-title">選擇模擬情境</div>
+    <div class="scenario-grid">
+
+      <div class="scenario-card scenario-gray" id="sc-0" onclick="selectScenario(0)">
+        <div class="scenario-check">✓</div>
+        <div class="scenario-icon">💼</div>
+        <div class="scenario-name">只有原工作</div>
+        <div class="scenario-desc">維持現有薪資，無額外收入來源</div>
+        <div class="scenario-amount">+$0 / 月</div>
+      </div>
+
+      <div class="scenario-card scenario-blue active" id="sc-1" onclick="selectScenario(1)">
+        <div class="scenario-check">✓</div>
+        <div class="scenario-icon">💡</div>
+        <div class="scenario-name">原工作 + 被動收入一萬</div>
+        <div class="scenario-desc">發展副業或投資，每月多一萬被動收入</div>
+        <div class="scenario-amount">+$10,000 / 月</div>
+      </div>
+
+      <div class="scenario-card scenario-gold pulse-gold" id="sc-2" onclick="selectScenario(2)">
+        <div class="scenario-check">✓</div>
+        <div class="scenario-icon">🚀</div>
+        <div class="scenario-name">被動收入五萬</div>
+        <div class="scenario-desc">建立多元被動收入，每月五萬不上班也有錢</div>
+        <div class="scenario-amount">+$50,000 / 月</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Simulate Button -->
+  <div class="section" style="padding: 20px 24px;">
+    <button class="btn-simulate" onclick="runSimulation()">
+      🔮 開始模擬我的人生軌跡
+    </button>
+    <div class="progress-wrap" id="progress-wrap">
+      <div class="progress-label">
+        <span id="progress-text">分析中...</span>
+        <span id="progress-pct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="section" id="results-section">
+
+    <div class="results-header">
+      <div class="results-title">📊 你的 5 年人生模擬結果</div>
+      <div id="badge-scenario" class="badge-scenario badge-blue">被動收入一萬方案</div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="section-title">收入時間軸</div>
+    <div class="timeline" id="timeline"></div>
+
+    <!-- Chart -->
+    <div class="chart-wrap">
+      <div class="chart-title">月收入成長趨勢（萬元）</div>
+      <div class="chart-bars" id="chart-bars"></div>
+    </div>
+
+    <!-- Quality -->
+    <div class="section-title">生活品質指標</div>
+    <div class="quality-grid" id="quality-grid"></div>
+
+    <!-- Metrics -->
+    <div class="metrics-row" id="metrics-row"></div>
+
+    <!-- Suggestion -->
+    <div class="suggestion-box" id="suggestion-box"></div>
+
+    <!-- Special Buttons -->
+    <div class="special-btns">
+      <button class="btn-special btn-weekend" onclick="openWeekendModal()">
+        🏖️ 週休三日模擬器
+      </button>
+      <button class="btn-special btn-antislave" onclick="openAntislaveModal()">
+        ⚡ 反社畜指數計算
+      </button>
+      <button class="btn-special btn-share" onclick="shareResult()">
+        📤 分享結果
+      </button>
+    </div>
+
+  </div><!-- /results -->
+
+</div><!-- /lsim-wrap -->
+
+<!-- Modal: Weekend -->
+<div class="modal-overlay" id="modal-weekend">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('modal-weekend')">✕</button>
+    <div class="modal-title">🏖️ 週休三日模擬器</div>
+    <div class="modal-sub">如果你每週只工作 4 天，生活會有什麼改變？</div>
+    <div id="weekend-content"></div>
+  </div>
+</div>
+
+<!-- Modal: Anti-Slave -->
+<div class="modal-overlay" id="modal-antislave">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('modal-antislave')">✕</button>
+    <div class="modal-title">⚡ 反社畜指數</div>
+    <div class="modal-sub">根據你的條件計算脫離社畜生活的可能性</div>
+    <div class="modal-score" id="antislave-score">--</div>
+    <div class="antislave-breakdown" id="antislave-breakdown"></div>
+    <div class="modal-desc" id="antislave-desc"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── State ── */
+  let selectedScenario = 1;
+  let lastResult = null;
+
+  /* ── Scenario Selection ── */
+  window.selectScenario = function(idx) {
+    selectedScenario = idx;
+    document.querySelectorAll('.scenario-card').forEach(function(c, i) {
+      c.classList.toggle('active', i === idx);
+    });
+  };
+
+  /* ── Helpers ── */
+  function fmt(n) {
+    return Math.round(n).toLocaleString('zh-TW');
+  }
+  function fmtW(n) {
+    return (n / 10000).toFixed(1);
+  }
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+  /* ── City Cost-of-living multiplier ── */
+  var cityCost = {taipei:1.25, newtaipei:1.1, taichung:1.0, kaohsiung:0.95, tainan:0.9, other:0.88};
+  var cityLabel = {taipei:'台北市', newtaipei:'新北市', taichung:'台中市', kaohsiung:'高雄市', tainan:'台南市', other:'其他縣市'};
+
+  /* ── Occupation multiplier ── */
+  var occGrowth = {engineer:1.08, designer:1.06, teacher:1.04, sales:1.07, student:1.03, retired:1.01, other:1.05};
+  var occLabel  = {engineer:'工程師', designer:'設計師', teacher:'教師', sales:'業務', student:'學生', retired:'退休人士', other:'其他'};
+
+  /* ── Family expense ── */
+  var familyCost = {single:0.4, married:0.55, kids:0.7};
+  var familyLabel = {single:'單身', married:'已婚', kids:'已婚有小孩'};
+
+  /* ── Scenario extra income ── */
+  var scenarioExtra = [0, 10000, 50000];
+  var scenarioLabel = ['只有原工作', '原工作+被動收入一萬', '被動收入五萬'];
+  var scenarioBadgeClass = ['badge-gray', 'badge-blue', 'badge-gold'];
+
+  /* ── Simulate ── */
+  window.runSimulation = function() {
+    var age       = parseInt(document.getElementById('age-slider').value, 10);
+    var occ       = document.getElementById('occupation').value;
+    var income    = parseInt(document.getElementById('income').value, 10) || 30000;
+    var family    = document.getElementById('family').value;
+    var city      = document.getElementById('city').value;
+    var sc        = selectedScenario;
+
+    income = clamp(income, 10000, 999999);
+
+    var pw   = document.getElementById('progress-wrap');
+    var pf   = document.getElementById('progress-fill');
+    var pt   = document.getElementById('progress-text');
+    var pct  = document.getElementById('progress-pct');
+    pw.style.display = 'block';
+
+    var steps = [
+      {pct: 15, text: '讀取個人資料...'},
+      {pct: 35, text: '計算收入成長曲線...'},
+      {pct: 55, text: '模擬生活品質指標...'},
+      {pct: 75, text: '分析被動收入效益...'},
+      {pct: 90, text: '生成個人化建議...'},
+      {pct: 100, text: '模擬完成！'}
+    ];
+    var si = 0;
+
+    function nextStep() {
+      if (si >= steps.length) {
+        setTimeout(function() {
+          pw.style.display = 'none';
+          showResults(age, occ, income, family, city, sc);
+        }, 300);
+        return;
+      }
+      var s = steps[si++];
+      pf.style.width = s.pct + '%';
+      pt.textContent = s.text;
+      pct.textContent = s.pct + '%';
+      setTimeout(nextStep, 380);
+    }
+    nextStep();
+  };
+
+  /* ── Show Results ── */
+  function showResults(age, occ, income, family, city, sc) {
+    var extra   = scenarioExtra[sc];
+    var growth  = occGrowth[occ] || 1.05;
+    var costMul = cityCost[city]  || 1.0;
+    var expRate = familyCost[family] || 0.4;
+
+    // milestones: 3m, 1y, 3y, 5y
+    var months = [3, 12, 36, 60];
+    var labels = ['3 個月', '1 年', '3 年', '5 年'];
+
+    function incomeAt(m) {
+      var yr = m / 12;
+      // job grows by occGrowth each year
+      var job = income * Math.pow(growth, yr);
+      // passive income ramps up over 2 years
+      var passive = extra * Math.min(1, m / 24);
+      return job + passive;
+    }
+
+    var data = months.map(function(m) {
+      return { months: m, label: labels[months.indexOf(m)], value: incomeAt(m) };
+    });
+
+    // badge
+    var badge = document.getElementById('badge-scenario');
+    badge.className = 'badge-scenario ' + scenarioBadgeClass[sc];
+    badge.textContent = scenarioLabel[sc];
+
+    // Timeline
+    var tl = document.getElementById('timeline');
+    tl.innerHTML = data.map(function(d, i) {
+      var growth_pct = i === 0
+        ? ((d.value - income) / income * 100).toFixed(0)
+        : ((d.value - data[i-1].value) / data[i-1].value * 100).toFixed(0);
+      var gpClass = parseFloat(growth_pct) > 0 ? 'up' : 'same';
+      var gpText  = parseFloat(growth_pct) > 0 ? '+' + growth_pct + '%' : growth_pct + '%';
+      return '<div class="tl-node animate-in" style="animation-delay:' + (i*0.1) + 's">'
+           + '<div class="tl-period">' + d.label + '</div>'
+           + '<div class="tl-income">$' + fmt(d.value) + '</div>'
+           + '<span class="tl-growth ' + gpClass + '">' + gpText + '</span>'
+           + '</div>';
+    }).join('');
+
+    // Chart
+    var maxVal = data[data.length-1].value * 1.05;
+    var bars = document.getElementById('chart-bars');
+    bars.innerHTML = data.map(function(d) {
+      var pct = Math.round((d.value / maxVal) * 100);
+      var isGold = sc === 2;
+      return '<div class="chart-bar-wrap">'
+           + '<div class="chart-bar' + (isGold ? ' gold-bar' : '') + '" style="height:' + pct + '%">'
+           + '</div>'
+           + '<div class="chart-bar-label">' + fmtW(d.value) + '萬<br>' + d.label + '</div>'
+           + '</div>';
+    }).join('');
+
+    // Quality Indicators
+    var flexScore   = sc === 0 ? 30 : sc === 1 ? 60 : 92;
+    var healthScore = sc === 0 ? 50 : sc === 1 ? 68 : 85;
+    var familyScore = sc === 0 ? 40 : sc === 1 ? 65 : 90;
+
+    var qualityData = [
+      { icon: '⏰', label: '工作時間彈性', score: flexScore },
+      { icon: '💪', label: '健康指數', score: healthScore },
+      { icon: '🏡', label: '家庭時間', score: familyScore },
+      { icon: '💰', label: '財務安全感', score: Math.min(95, 40 + sc * 25) },
+      { icon: '🧘', label: '生活壓力指數（低=好）', score: 90 - sc * 22 },
+      { icon: '🌱', label: '個人成長空間', score: 45 + sc * 22 }
+    ];
+
+    var qg = document.getElementById('quality-grid');
+    qg.innerHTML = qualityData.map(function(q) {
+      return '<div class="quality-card">'
+           + '<div class="quality-icon">' + q.icon + '</div>'
+           + '<div class="quality-label">' + q.label + '</div>'
+           + '<div class="quality-bar-track"><div class="quality-bar-fill" style="width:' + q.score + '%"></div></div>'
+           + '<div class="quality-val">' + q.score + ' / 100</div>'
+           + '</div>';
+    }).join('');
+
+    // Metrics
+    var fiveYrIncome = data[3].value;
+    var baseFiveYr   = incomeBaseAt(60, income);
+    var extra5y_total = (fiveYrIncome - baseFiveYr) * 60;
+    var mr = document.getElementById('metrics-row');
+    mr.innerHTML =
+      '<div class="metric-card mc-blue">'
+      + '<div class="metric-icon">💵</div>'
+      + '<div class="metric-label">5 年後月收入</div>'
+      + '<div class="metric-value">$' + fmt(fiveYrIncome) + '</div>'
+      + '<div class="metric-sub">相較今日成長 ' + ((fiveYrIncome/income-1)*100).toFixed(0) + '%</div>'
+      + '</div>'
+      + '<div class="metric-card mc-gold">'
+      + '<div class="metric-icon">📈</div>'
+      + '<div class="metric-label">5 年累計額外收益</div>'
+      + '<div class="metric-value">$' + fmt(extra * 60 * 0.8) + '</div>'
+      + '<div class="metric-sub">被動收入的複利效果</div>'
+      + '</div>';
+
+    // Suggestion
+    var suggestion = buildSuggestion(age, occ, income, family, city, sc, data);
+    document.getElementById('suggestion-box').innerHTML = suggestion;
+
+    // Store for modals
+    lastResult = {age, occ, income, family, city, sc, data, flexScore, healthScore, familyScore};
+
+    // Show
+    var rs = document.getElementById('results-section');
+    rs.style.display = 'block';
+    rs.scrollIntoView({behavior: 'smooth', block: 'start'});
+  }
+
+  function incomeBaseAt(m, income) {
+    var yr = m / 12;
+    return income * Math.pow(1.04, yr);
+  }
+
+  /* ── Suggestion ── */
+  function buildSuggestion(age, occ, income, family, city, sc, data) {
+    var occLbl = occLabel[occ] || '工作者';
+    var cityLbl = cityLabel[city] || '您所在城市';
+    var famLbl = familyLabel[family] || '';
+    var fiveYr = fmt(data[3].value);
+    var tips = {
+      0: '建議開始規劃副業或被動收入，避免收入成長受限。',
+      1: '每月一萬被動收入是個好起點，持續累積後效益顯著。建議投入指數型ETF或發展個人品牌副業。',
+      2: '月入五萬被動收入，5 年後財務自由機會相當高！建議結合房地產、版權收入與股息策略。'
+    };
+    var invest = {
+      engineer: '技術背景適合：SaaS 產品、技術顧問、線上課程',
+      designer: '設計專業適合：設計模板販售、UI 遠端接案、品牌顧問',
+      teacher:  '教育背景適合：線上教學平台、出版教材、補習班講師',
+      sales:    '業務技能適合：聯盟行銷、保險或房產佣金、電商代理',
+      student:  '學生時期適合：建立個人品牌、自學技能接案、投資理財起步',
+      retired:  '退休後適合：股票股利、租金收入、分享人生智慧的顧問服務',
+      other:    '各領域都可發展：副業電商、自媒體、技能接案平台'
+    };
+    return '<h3>💡 個人化建議</h3>'
+      + '<p>根據你的情況：<strong>' + occLbl + ' ｜ ' + cityLbl + ' ｜ ' + famLbl + '</strong></p>'
+      + '<p>目前月收入 <strong>$' + fmt(income) + '</strong>，5 年後預估月收入 <strong>$' + fiveYr + '</strong>。</p>'
+      + '<p style="margin-top:8px">' + tips[sc] + '</p>'
+      + '<p style="margin-top:8px">💼 適合你的發展方向：<strong>' + (invest[occ] || invest.other) + '</strong></p>';
+  }
+
+  /* ── Weekend Modal ── */
+  window.openWeekendModal = function() {
+    if (!lastResult) { showToast('請先執行模擬！'); return; }
+    var r = lastResult;
+    var daily = r.income / 22;
+    var weekday4 = daily * 20;
+    var saved_hours = 8 * 52;
+    var content = document.getElementById('weekend-content');
+    content.innerHTML =
+      '<div style="display:grid;gap:12px;margin-top:8px">'
+      + '<div style="background:rgba(13,148,136,.15);border:1px solid rgba(13,148,136,.3);border-radius:10px;padding:14px">'
+      + '<div style="font-size:13px;color:#5eead4;margin-bottom:4px">每週工作 4 天後，月薪估算</div>'
+      + '<div style="font-size:26px;font-weight:800;color:#99f6e4">$' + fmt(weekday4) + '</div>'
+      + '<div style="font-size:12px;color:#94a3b8">減少約 ' + fmt(r.income - weekday4) + ' 元 (-9%)</div>'
+      + '</div>'
+      + '<div style="background:rgba(13,148,136,.1);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px">'
+      + '<div style="font-size:13px;color:#5eead4;margin-bottom:8px">每年多出的自由時間</div>'
+      + '<div style="font-size:22px;font-weight:700;color:#f1f5f9">' + saved_hours + ' 小時 / 年</div>'
+      + '<div style="font-size:12px;color:#94a3b8;margin-top:4px">相當於 ' + Math.round(saved_hours/24) + ' 天 ｜ 可以環遊世界一圈</div>'
+      + '</div>'
+      + '<div style="background:rgba(13,148,136,.1);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px">'
+      + '<div style="font-size:13px;color:#5eead4;margin-bottom:8px">每週多 1 天 = 副業黃金時間</div>'
+      + '<div style="font-size:14px;color:#cbd5e1;line-height:1.7">如果把每週多出的 8 小時投入被動收入建設，<br>3 年後可能帶來每月 <strong style="color:#fbbf24">$15,000 ~ $30,000</strong> 的額外收入</div>'
+      + '</div>'
+      + '</div>';
+    document.getElementById('modal-weekend').classList.add('open');
+  };
+
+  /* ── Antislave Modal ── */
+  window.openAntislaveModal = function() {
+    if (!lastResult) { showToast('請先執行模擬！'); return; }
+    var r = lastResult;
+    var income = r.income;
+    var sc = r.sc;
+    var age = r.age;
+    var city = r.city;
+
+    // Score breakdown
+    var incomeScore   = Math.min(30, Math.round(income / 5000));
+    var scScore       = [0, 20, 35][sc];
+    var ageScore      = age < 30 ? 20 : age < 40 ? 15 : age < 50 ? 10 : 5;
+    var cityScore     = {taipei:0, newtaipei:3, taichung:5, kaohsiung:6, tainan:7, other:8}[city] || 5;
+    var total         = Math.min(100, incomeScore + scScore + ageScore + cityScore);
+
+    var desc =
+      total >= 80 ? '🎉 你幾乎已經是自由職人了！財務自由唾手可得，繼續衝！' :
+      total >= 60 ? '💪 離脫離社畜不遠了！持續建立被動收入，再兩三年可以財務自主！' :
+      total >= 40 ? '🌱 有潛力但還需努力。建議先從小額被動收入開始，逐步積累。' :
+                    '😅 社畜指數偏高。別擔心，從現在開始改變，未來 5 年可以大幅翻轉！';
+
+    document.getElementById('antislave-score').textContent = total;
+    document.getElementById('antislave-desc').innerHTML = '<p style="margin-top:12px;font-size:14px;line-height:1.8">' + desc + '</p>';
+    document.getElementById('antislave-breakdown').innerHTML =
+      '<div class="ab-row"><span class="ab-row-label">💰 收入評分</span><span class="ab-row-val">+' + incomeScore + ' 分</span></div>'
+      + '<div class="ab-row"><span class="ab-row-label">📊 收入策略</span><span class="ab-row-val">+' + scScore + ' 分</span></div>'
+      + '<div class="ab-row"><span class="ab-row-label">🎂 年齡優勢</span><span class="ab-row-val">+' + ageScore + ' 分</span></div>'
+      + '<div class="ab-row"><span class="ab-row-label">🏙️ 城市成本</span><span class="ab-row-val">+' + cityScore + ' 分</span></div>'
+      + '<div class="ab-row" style="border-top:1px solid rgba(245,158,11,.3);padding-top:12px;margin-top:4px">'
+      + '<span style="color:#fbbf24;font-weight:700">總反社畜指數</span>'
+      + '<span style="color:#fbbf24;font-weight:800;font-size:18px">' + total + ' / 100</span></div>';
+
+    document.getElementById('modal-antislave').classList.add('open');
+  };
+
+  /* ── Close Modal ── */
+  window.closeModal = function(id) {
+    document.getElementById(id).classList.remove('open');
+  };
+
+  /* ── Share ── */
+  window.shareResult = function() {
+    if (!lastResult) { showToast('請先執行模擬！'); return; }
+    var r = lastResult;
+    var text = '人生模擬器結果 📊\n'
+      + '職業：' + (occLabel[r.occ] || r.occ) + ' ｜ 城市：' + (cityLabel[r.city] || r.city) + '\n'
+      + '策略：' + scenarioLabel[r.sc] + '\n'
+      + '5年後月收入預估：$' + fmt(r.data[3].value) + '\n'
+      + '#人生模擬器 #財務自由 #被動收入';
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function() {
+        showToast('✅ 結果已複製到剪貼簿！');
+      }).catch(function() { fallbackCopy(text); });
+    } else {
+      fallbackCopy(text);
+    }
+  };
+
+  function fallbackCopy(text) {
+    var el = document.createElement('textarea');
+    el.value = text;
+    el.style.position = 'fixed';
+    el.style.opacity = '0';
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    showToast('✅ 結果已複製到剪貼簿！');
+  }
+
+  /* ── Toast ── */
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function() { t.style.display = 'none'; }, 2600);
+  }
+
+  /* ── Click outside modal to close ── */
+  document.querySelectorAll('.modal-overlay').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      if (e.target === el) el.classList.remove('open');
+    });
+  });
+
+})();
+</script>
+</body>
+</html>
