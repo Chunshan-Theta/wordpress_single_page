@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>開心水族箱 — 線上魚缸</title>
+<!-- SEO Meta Tags -->
+<meta name="description" content="開心水族箱 — 線上魚缸遊戲。添加各種魚類、餵食互動、自訂魚缸背景，享受療癒的水族箱體驗。">
+<meta name="keywords" content="開心水族箱, 線上魚缸, 水族箱遊戲, 魚缸遊戲, 餵魚, 虛擬寵物">
+<meta name="author" content="開心水族箱">
+<meta property="og:title" content="開心水族箱 — 線上魚缸">
+<meta property="og:description" content="添加各種魚類、餵食互動、自訂魚缸背景，享受療癒的水族箱體驗。">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="開心水族箱 — 線上魚缸">
+<meta name="twitter:description" content="添加各種魚類、餵食互動、自訂魚缸背景，享受療癒的水族箱體驗。">
+<!-- End of SEO Meta Tags -->
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ocean-dark: #0a1628;
+  --ocean-mid: #0d2444;
+  --ocean-bright: #1565c0;
+  --teal: #00838f;
+  --sand: #f4d03f;
+  --coral: #e74c3c;
+  --foam: rgba(255,255,255,0.08);
+  --border: rgba(255,255,255,0.15);
+  --radius: 14px;
+  --shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+  background: linear-gradient(160deg, #061428 0%, #0a1e3c 50%, #061020 100%);
+  color: #e0f0ff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden;
+}
+
+/* ── Header ── */
+.page-header {
+  width: 100%;
+  text-align: center;
+  padding: 24px 16px 8px;
+  position: relative;
+  z-index: 10;
+}
+.page-header h1 {
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 700;
+  background: linear-gradient(135deg, #64d8ff, #a8edff, #ffffff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  letter-spacing: 0.04em;
+}
+.page-header p {
+  font-size: 0.9rem;
+  color: rgba(180,220,255,0.7);
+  margin-top: 4px;
+}
+
+/* ── Main container ── */
+#aquarium-wrap {
+  width: 100%;
+  max-width: 900px;
+  padding: 8px 12px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ── Background selector ── */
+.bg-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+.bg-selector span {
+  font-size: 0.82rem;
+  color: rgba(180,220,255,0.75);
+  white-space: nowrap;
+}
+.bg-btn {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color .2s, transform .2s;
+  flex-shrink: 0;
+  outline: none;
+}
+.bg-btn:hover { transform: scale(1.15); }
+.bg-btn.active { border-color: #fff; transform: scale(1.18); }
+#bg-upload-label {
+  display: flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: 2px dashed rgba(255,255,255,0.5);
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: rgba(255,255,255,0.7);
+  transition: border-color .2s, transform .2s;
+  background: rgba(255,255,255,0.07);
+}
+#bg-upload-label:hover { border-color: #fff; transform: scale(1.15); color: #fff; }
+#bg-upload { display: none; }
+
+/* ── Tank wrapper ── */
+.tank-outer {
+  position: relative;
+  width: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 3px solid rgba(100,180,255,0.35);
+  box-shadow:
+    0 0 40px rgba(0,100,200,0.3),
+    inset 0 0 60px rgba(0,50,150,0.2);
+  cursor: crosshair;
+}
+
+/* Water shimmer overlay */
+.tank-outer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.06) 0%,
+    rgba(255,255,255,0.01) 40%,
+    rgba(0,50,120,0.1) 100%
+  );
+  pointer-events: none;
+  z-index: 5;
+  border-radius: 15px;
+}
+
+/* Glass reflection */
+.tank-outer::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 35%; height: 100%;
+  background: linear-gradient(100deg,
+    rgba(255,255,255,0.04) 0%,
+    rgba(255,255,255,0.01) 60%,
+    transparent 100%);
+  pointer-events: none;
+  z-index: 5;
+  border-radius: 15px 0 0 15px;
+}
+
+#tank-canvas {
+  display: block;
+  width: 100%;
+  height: 420px;
+  border-radius: 15px;
+}
+
+/* ── Feed hint ── */
+.feed-hint {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(4px);
+  color: rgba(200,235,255,0.8);
+  font-size: 0.75rem;
+  padding: 4px 12px;
+  border-radius: 20px;
+  pointer-events: none;
+  z-index: 10;
+  white-space: nowrap;
+}
+
+/* ── Fish panel ── */
+.fish-panel {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(100,180,255,0.2);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.fish-panel-title {
+  font-size: 0.82rem;
+  color: rgba(180,220,255,0.7);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.fish-panel-title::before {
+  content: '🐠';
+  font-size: 1rem;
+}
+.fish-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.add-fish-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(100,180,255,0.25);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background .2s, transform .15s, border-color .2s;
+  color: #cde8ff;
+  font-size: 0.78rem;
+  min-width: 72px;
+  outline: none;
+}
+.add-fish-btn:hover {
+  background: rgba(100,180,255,0.15);
+  border-color: rgba(100,180,255,0.5);
+  transform: translateY(-2px);
+}
+.add-fish-btn:active { transform: translateY(0); }
+.add-fish-btn .fish-icon { font-size: 1.5rem; line-height: 1; }
+.add-fish-btn .fish-name { font-size: 0.72rem; color: rgba(200,230,255,0.85); }
+.add-fish-btn .fish-time { font-size: 0.65rem; color: rgba(150,200,255,0.6); }
+
+/* ── Fish list ── */
+.fish-list-section {
+  width: 100%;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(100,180,255,0.15);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+.fish-list-title {
+  font-size: 0.82rem;
+  color: rgba(180,220,255,0.65);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.fish-list-title::before { content: '📋'; font-size: 0.9rem; }
+#fish-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 32px;
+}
+.fish-tag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  border: 1px solid transparent;
+  animation: tagIn .3s ease;
+}
+@keyframes tagIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.fish-tag.leaving {
+  animation: tagOut .5s ease forwards;
+}
+@keyframes tagOut {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(0.5); }
+}
+.fish-tag .tag-icon { font-size: 1rem; }
+.fish-tag .tag-name { font-weight: 600; }
+.fish-tag .tag-timer { font-size: 0.68rem; opacity: 0.8; }
+.fish-list-empty {
+  color: rgba(150,190,255,0.4);
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  #tank-canvas { height: 300px; }
+  .add-fish-btn { min-width: 60px; padding: 8px 10px; }
+}
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <h1>🐟 開心水族箱</h1>
+  <p>點擊魚缸丟下飼料 · 新增魚兒 · 自訂背景</p>
+</header>
+
+<main id="aquarium-wrap">
+
+  <!-- Background selector -->
+  <div class="bg-selector">
+    <span>背景：</span>
+    <!-- preset swatches filled by JS -->
+    <div id="bg-swatches"></div>
+    <label id="bg-upload-label" title="上傳自訂背景">📁
+      <input type="file" id="bg-upload" accept="image/*">
+    </label>
+  </div>
+
+  <!-- Tank -->
+  <div class="tank-outer" id="tank-outer">
+    <canvas id="tank-canvas"></canvas>
+    <div class="feed-hint">點擊魚缸投放飼料 🍖</div>
+  </div>
+
+  <!-- Fish add buttons -->
+  <div class="fish-panel">
+    <div class="fish-panel-title">新增魚兒到魚缸</div>
+    <div class="fish-buttons" id="fish-buttons"></div>
+  </div>
+
+  <!-- Fish list -->
+  <div class="fish-list-section">
+    <div class="fish-list-title">目前魚缸成員</div>
+    <div id="fish-list"><span class="fish-list-empty">魚缸空空如也，快去添加魚兒吧！</span></div>
+  </div>
+
+</main>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   AQUARIUM ENGINE
+   ═══════════════════════════════════════════════════════════ */
+
+const canvas  = document.getElementById('tank-canvas');
+const ctx     = canvas.getContext('2d');
+const outer   = document.getElementById('tank-outer');
+
+/* ── Fish type definitions ── */
+const FISH_TYPES = [
+  { id:'clown',   name:'小丑魚',   icon:'🐠', duration:60,  baseSize:22, colors:['#ff6b35','#fff','#ff6b35'], stripes:true  },
+  { id:'blue',    name:'藍吊',     icon:'🐟', duration:90,  baseSize:24, colors:['#1e90ff','#ffff00','#1e90ff'], stripes:false },
+  { id:'angel',   name:'神仙魚',   icon:'🐡', duration:120, baseSize:28, colors:['#c8a2c8','#fff8dc','#c8a2c8'], stripes:true  },
+  { id:'gold',    name:'金魚',     icon:'🎏', duration:45,  baseSize:20, colors:['#ffd700','#ff8c00','#ffd700'], stripes:false },
+  { id:'neon',    name:'霓虹燈魚', icon:'✨', duration:30,  baseSize:14, colors:['#00ffff','#ff0080','#00ffff'], stripes:false },
+  { id:'shark',   name:'小鯊魚',   icon:'🦈', duration:180, baseSize:36, colors:['#708090','#b0c4de','#708090'], stripes:false },
+  { id:'puffer',  name:'河豚',     icon:'🐡', duration:75,  baseSize:26, colors:['#90ee90','#ffa500','#90ee90'], stripes:false },
+  { id:'star',    name:'海星',     icon:'⭐', duration:50,  baseSize:18, colors:['#ff6347','#ff4500','#ff6347'], stripes:false },
+];
+
+/* ── Background presets ── */
+const BG_PRESETS = [
+  { label:'深海藍',  style: 'linear-gradient(180deg, #0a2a5e 0%, #0d3b7a 45%, #071d3e 100%)' },
+  { label:'珊瑚礁',  style: 'linear-gradient(180deg, #1a4a6e 0%, #0d5c5c 50%, #2a3a1a 100%)' },
+  { label:'夕陽海',  style: 'linear-gradient(180deg, #2c0a3e 0%, #5a2080 40%, #0d2060 100%)' },
+  { label:'熱帶海',  style: 'linear-gradient(180deg, #004466 0%, #006688 40%, #003322 100%)' },
+  { label:'暗黑海',  style: 'linear-gradient(180deg, #050505 0%, #0f0f1e 50%, #050505 100%)' },
+  { label:'極光海',  style: 'linear-gradient(180deg, #001a33 0%, #004d40 40%, #1a0033 100%)' },
+];
+const BG_SWATCH_COLORS = ['#1a4078','#1a5050','#3c1060','#0d4466','#0f0f1e','#00332a'];
+
+/* ── State ── */
+let bgStyle   = BG_PRESETS[0].style;
+let bgImage   = null; // HTMLImageElement or null
+let fishes    = [];   // active fish
+let foods     = [];   // active food pellets
+let bubbles   = [];   // decorative bubbles
+let fishIdCtr = 0;
+
+/* ── Canvas resize ── */
+function resizeCanvas() {
+  const rect = canvas.getBoundingClientRect();
+  canvas.width  = rect.width  * window.devicePixelRatio;
+  canvas.height = rect.height * window.devicePixelRatio;
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+}
+window.addEventListener('resize', () => { resizeCanvas(); });
+resizeCanvas();
+
+function W() { return canvas.getBoundingClientRect().width; }
+function H() { return canvas.getBoundingClientRect().height; }
+
+/* ══════════════════════════════════════
+   FISH
+   ══════════════════════════════════════ */
+class Fish {
+  constructor(type) {
+    this.id        = ++fishIdCtr;
+    this.type      = type;
+    this.size      = type.baseSize * (0.85 + Math.random() * 0.3);
+    this.maxSize   = type.baseSize * 2.5;
+    this.x         = Math.random() * (W() - 80) + 40;
+    this.y         = 80 + Math.random() * (H() - 160);
+    this.vx        = (Math.random() * 1.2 + 0.5) * (Math.random() < 0.5 ? 1 : -1);
+    this.vy        = 0;
+    this.angle     = 0;          // tail wiggle phase
+    this.wobble    = Math.random() * Math.PI * 2;
+    this.facingLeft = this.vx < 0;
+    this.timeLeft  = type.duration;
+    this.alive     = true;
+    this.eating    = 0;          // flash timer when eating
+    this.target    = null;       // food pellet being chased
+    this.colors    = type.colors;
+    this.stripes   = type.stripes;
+    // for leaving animation
+    this.leaving   = false;
+    this.leaveTimer = 0;
+    // tag DOM element
+    this.tag = null;
+  }
+
+  update(dt, foodList) {
+    if (!this.alive) return;
+
+    this.timeLeft -= dt;
+    if (this.timeLeft <= 0 && !this.leaving) {
+      this.leaving   = true;
+      this.leaveTimer = 1.5; // seconds for exit animation
+    }
+    if (this.leaving) {
+      this.leaveTimer -= dt;
+      this.vx = this.facingLeft ? -3 : 3; // swim out
+      this.vy = 0;
+      if (this.leaveTimer <= 0) {
+        this.alive = false;
+        return;
+      }
+    }
+
+    this.angle  += dt * 8;
+    this.wobble += dt * 1.2;
+
+    // Food attraction
+    if (!this.leaving) {
+      if (this.target && !this.target.alive) this.target = null;
+      if (!this.target && foodList.length > 0) {
+        // pick nearest food
+        let best = null, bestD = Infinity;
+        for (const f of foodList) {
+          if (!f.alive) continue;
+          const d = Math.hypot(f.x - this.x, f.y - this.y);
+          if (d < bestD) { bestD = d; best = f; }
+        }
+        this.target = best;
+      }
+
+      if (this.target && this.target.alive) {
+        const dx = this.target.x - this.x;
+        const dy = this.target.y - this.y;
+        const d  = Math.hypot(dx, dy);
+        const speed = Math.min(3.5, 60 / d);
+        this.vx = (dx / d) * speed;
+        this.vy = (dy / d) * speed;
+      } else {
+        // natural drift
+        if (Math.random() < 0.008) {
+          this.vx += (Math.random() - 0.5) * 0.8;
+          this.vy += (Math.random() - 0.5) * 0.4;
+        }
+        this.vy += Math.sin(this.wobble) * 0.04;
+        this.vx = Math.max(-2.5, Math.min(2.5, this.vx));
+        this.vy = Math.max(-1.5, Math.min(1.5, this.vy));
+      }
+    }
+
+    this.x += this.vx;
+    this.y += this.vy;
+
+    const hw = this.size;
+    if (this.x < hw) { this.x = hw; this.vx = Math.abs(this.vx); }
+    if (this.x > W() - hw) { this.x = W() - hw; this.vx = -Math.abs(this.vx); }
+    if (this.y < hw) { this.y = hw; this.vy = Math.abs(this.vy); }
+    if (this.y > H() - hw - 10) { this.y = H() - hw - 10; this.vy = -Math.abs(this.vy); }
+
+    if (this.vx !== 0) this.facingLeft = this.vx < 0;
+
+    if (this.eating > 0) this.eating -= dt;
+
+    // Eat food
+    for (const f of foodList) {
+      if (!f.alive) continue;
+      const d = Math.hypot(f.x - this.x, f.y - this.y);
+      if (d < this.size * 0.9 + f.size) {
+        f.alive = false;
+        this.size = Math.min(this.maxSize, this.size * 1.12);
+        this.eating = 0.4;
+        this.target = null;
+      }
+    }
+  }
+
+  draw(ctx) {
+    if (!this.alive) return;
+    const alpha = this.leaving
+      ? Math.max(0, this.leaveTimer / 1.5)
+      : 1;
+    ctx.save();
+    // Flash effect when eating: base opacity 0.75, pulsing amplitude 0.25, frequency 30 rad/s
+    const FLASH_BASE = 0.75, FLASH_AMP = 0.25, FLASH_FREQ = 30;
+    ctx.globalAlpha = alpha * (this.eating > 0 ? (FLASH_BASE + FLASH_AMP * Math.sin(this.eating * FLASH_FREQ)) : 1);
+    ctx.translate(this.x, this.y);
+    if (this.facingLeft) ctx.scale(-1, 1);
+
+    const s = this.size;
+    const tailWag = Math.sin(this.angle) * 0.35;
+
+    // Tail
+    ctx.beginPath();
+    ctx.moveTo(-s * 0.6, 0);
+    ctx.lineTo(-s * 1.5, -s * 0.7 + tailWag * s);
+    ctx.lineTo(-s * 1.5,  s * 0.7 + tailWag * s);
+    ctx.closePath();
+    ctx.fillStyle = this.colors[2];
+    ctx.fill();
+
+    // Body
+    ctx.beginPath();
+    ctx.ellipse(0, 0, s * 1.1, s * 0.6, 0, 0, Math.PI * 2);
+    ctx.fillStyle = this.colors[0];
+    ctx.fill();
+
+    // Stripe(s)
+    if (this.stripes) {
+      ctx.save();
+      ctx.clip();
+      ctx.fillStyle = this.colors[1];
+      ctx.fillRect(-s * 0.2, -s * 0.6, s * 0.3, s * 1.2);
+      if (s > 18) ctx.fillRect(s * 0.35, -s * 0.6, s * 0.22, s * 1.2);
+      ctx.restore();
+    } else {
+      // belly highlight
+      ctx.beginPath();
+      ctx.ellipse(s * 0.1, s * 0.2, s * 0.65, s * 0.35, 0, 0, Math.PI * 2);
+      ctx.fillStyle = this.colors[1];
+      ctx.globalAlpha *= 0.35;
+      ctx.fill();
+      ctx.globalAlpha /= 0.35;
+    }
+
+    // Dorsal fin
+    ctx.beginPath();
+    ctx.moveTo(s * 0.3, -s * 0.58);
+    ctx.quadraticCurveTo(s * 0.05, -s * 1.1, -s * 0.3, -s * 0.55);
+    ctx.lineTo(s * 0.3, -s * 0.58);
+    ctx.fillStyle = this.colors[0];
+    ctx.globalAlpha *= 0.7;
+    ctx.fill();
+    ctx.globalAlpha /= 0.7;
+
+    // Pectoral fin
+    ctx.beginPath();
+    ctx.ellipse(s * 0.2, s * 0.3, s * 0.38, s * 0.18, -0.4, 0, Math.PI * 2);
+    ctx.fillStyle = this.colors[1];
+    ctx.globalAlpha *= 0.55;
+    ctx.fill();
+    ctx.globalAlpha /= 0.55;
+
+    // Eye
+    ctx.beginPath();
+    ctx.arc(s * 0.65, -s * 0.12, s * 0.14, 0, Math.PI * 2);
+    ctx.fillStyle = '#111';
+    ctx.globalAlpha = alpha;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(s * 0.68, -s * 0.16, s * 0.055, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff';
+    ctx.fill();
+
+    ctx.restore();
+
+    // Timer badge
+    if (!this.leaving && this.timeLeft > 0) {
+      const secs = Math.ceil(this.timeLeft);
+      const badgeText = secs >= 60
+        ? `${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}`
+        : `${secs}s`;
+      const urgency = this.timeLeft < 15;
+      ctx.save();
+      ctx.font = `bold ${Math.max(9, s * 0.45)}px sans-serif`;
+      ctx.textAlign = 'center';
+      const bw = ctx.measureText(badgeText).width + 8;
+      const bh = Math.max(9, s * 0.45) + 6;
+      const bx = this.x - bw / 2;
+      const by = this.y - s - bh - 4;
+      ctx.fillStyle = urgency ? 'rgba(200,30,30,0.82)' : 'rgba(0,0,0,0.55)';
+      _roundRect(ctx, bx, by, bw, bh, 4);
+      ctx.fill();
+      ctx.fillStyle = urgency ? '#ffdddd' : '#d0eeff';
+      ctx.fillText(badgeText, this.x, by + bh - 4);
+      ctx.restore();
+    }
+  }
+}
+
+function _roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r);
+  ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+}
+
+/* ══════════════════════════════════════
+   FOOD
+   ══════════════════════════════════════ */
+class Food {
+  constructor(x, y) {
+    this.x     = x;
+    this.y     = y;
+    this.vy    = 0.3;
+    this.size  = 5;
+    this.alive = true;
+    this.wobble = 0;
+    this.age   = 0;
+  }
+  update(dt) {
+    if (!this.alive) return;
+    this.age += dt;
+    this.wobble += dt * 3;
+    this.vy = Math.min(1.6, this.vy + 0.015);
+    this.x += Math.sin(this.wobble) * 0.3;
+    this.y += this.vy;
+    if (this.y > H() - 8) { this.y = H() - 8; this.vy = 0; }
+    if (this.age > 12) this.alive = false; // expires after 12s if uneaten
+  }
+  draw(ctx) {
+    if (!this.alive) return;
+    const alpha = this.age > 9 ? 1 - (this.age - 9) / 3 : 1;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    // Pellet
+    const grad = ctx.createRadialGradient(this.x - 1, this.y - 1, 0.5, this.x, this.y, this.size);
+    grad.addColorStop(0, '#ffe8a0');
+    grad.addColorStop(1, '#cc8800');
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+/* ══════════════════════════════════════
+   BUBBLES
+   ══════════════════════════════════════ */
+class Bubble {
+  constructor() { this.reset(); }
+  reset() {
+    this.x    = Math.random() * W();
+    this.y    = H() + 10;
+    this.r    = 2 + Math.random() * 5;
+    this.vy   = -(0.5 + Math.random() * 1.0);
+    this.vx   = (Math.random() - 0.5) * 0.4;
+    this.life = 1.0;
+  }
+  update(dt) {
+    this.x += this.vx + Math.sin(this.y * 0.05) * 0.15;
+    this.y += this.vy;
+    if (this.y < -10) this.reset();
+  }
+  draw(ctx) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(200,240,255,0.35)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(this.x - this.r * 0.3, this.y - this.r * 0.3, this.r * 0.25, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+// Spawn initial bubbles
+for (let i = 0; i < 18; i++) {
+  const b = new Bubble();
+  b.y = Math.random() * H(); // start spread
+  bubbles.push(b);
+}
+
+/* ══════════════════════════════════════
+   SAND / DECOR (bottom)
+   ══════════════════════════════════════ */
+function drawDecor(ctx) {
+  const w = W(), h = H();
+
+  // Sand layer
+  const sandGrad = ctx.createLinearGradient(0, h - 40, 0, h);
+  sandGrad.addColorStop(0, 'rgba(180,150,80,0.55)');
+  sandGrad.addColorStop(1, 'rgba(140,110,50,0.75)');
+  ctx.beginPath();
+  ctx.moveTo(0, h);
+  for (let x = 0; x <= w; x += 20) {
+    ctx.lineTo(x, h - 30 + Math.sin(x * 0.15) * 8);
+  }
+  ctx.lineTo(w, h);
+  ctx.closePath();
+  ctx.fillStyle = sandGrad;
+  ctx.fill();
+
+  // Seaweed
+  const weedPositions = [w * 0.08, w * 0.22, w * 0.65, w * 0.85];
+  for (const wx of weedPositions) {
+    drawSeaweed(ctx, wx, h - 30, 3 + Math.floor(wx / 100) % 2);
+  }
+
+  // Pebbles
+  const pebbles = [
+    {x: w*0.12, y: h-24, r: 7},
+    {x: w*0.35, y: h-22, r: 5},
+    {x: w*0.5,  y: h-25, r: 9},
+    {x: w*0.72, y: h-23, r: 6},
+    {x: w*0.9,  y: h-24, r: 8},
+  ];
+  for (const p of pebbles) {
+    ctx.beginPath();
+    ctx.ellipse(p.x, p.y, p.r, p.r * 0.65, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(100,90,80,0.7)';
+    ctx.fill();
+  }
+}
+
+let seaweedPhase = 0;
+function drawSeaweed(ctx, x, baseY, segments) {
+  ctx.save();
+  ctx.strokeStyle = 'rgba(30,160,80,0.75)';
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  const segH = 18;
+  ctx.beginPath();
+  let cx = x, cy = baseY;
+  ctx.moveTo(cx, cy);
+  for (let i = 0; i < segments; i++) {
+    const sway = Math.sin(seaweedPhase + i * 1.2 + x * 0.02) * 8;
+    cx += sway;
+    cy -= segH;
+    ctx.lineTo(cx, cy);
+  }
+  ctx.stroke();
+
+  // Leaf blades
+  for (let i = 1; i <= segments; i++) {
+    const sway = Math.sin(seaweedPhase + (i - 1) * 1.2 + x * 0.02) * 8;
+    const lx = x + sway - (i === 1 ? 8 : 6) * Math.cos(seaweedPhase + i);
+    const ly = baseY - i * segH;
+    ctx.beginPath();
+    ctx.ellipse(lx, ly, 10, 5, Math.sin(seaweedPhase + i) * 0.6, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(40,180,90,0.55)';
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+/* ══════════════════════════════════════
+   DRAW BACKGROUND
+   ══════════════════════════════════════ */
+function drawBackground(ctx, nowMs) {
+  const w = W(), h = H();
+  if (bgImage) {
+    ctx.drawImage(bgImage, 0, 0, w, h);
+    // slight darkening overlay for readability
+    ctx.fillStyle = 'rgba(0,10,30,0.25)';
+    ctx.fillRect(0, 0, w, h);
+  } else {
+    // Each preset gradient is matched by its unique anchor colour and replicated as a canvas gradient.
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    if (bgStyle.includes('#0a2a5e')) {
+      grad.addColorStop(0, '#0a2a5e'); grad.addColorStop(0.45, '#0d3b7a'); grad.addColorStop(1, '#071d3e');
+    } else if (bgStyle.includes('#1a4a6e')) {
+      grad.addColorStop(0, '#1a4a6e'); grad.addColorStop(0.5, '#0d5c5c'); grad.addColorStop(1, '#2a3a1a');
+    } else if (bgStyle.includes('#2c0a3e')) {
+      grad.addColorStop(0, '#2c0a3e'); grad.addColorStop(0.4, '#5a2080'); grad.addColorStop(1, '#0d2060');
+    } else if (bgStyle.includes('#004466')) {
+      grad.addColorStop(0, '#004466'); grad.addColorStop(0.4, '#006688'); grad.addColorStop(1, '#003322');
+    } else if (bgStyle.includes('#050505')) {
+      grad.addColorStop(0, '#050505'); grad.addColorStop(0.5, '#0f0f1e'); grad.addColorStop(1, '#050505');
+    } else {
+      grad.addColorStop(0, '#001a33'); grad.addColorStop(0.4, '#004d40'); grad.addColorStop(1, '#1a0033');
+    }
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+
+    // Light caustics
+    for (let i = 0; i < 5; i++) {
+      const cx2 = (w * (i + 0.5) / 5) + Math.sin(nowMs * 0.0005 + i) * 30;
+      const cg = ctx.createRadialGradient(cx2, -20, 0, cx2, h * 0.5, h * 0.7);
+      cg.addColorStop(0, 'rgba(100,200,255,0.06)');
+      cg.addColorStop(1, 'transparent');
+      ctx.fillStyle = cg;
+      ctx.fillRect(0, 0, w, h);
+    }
+  }
+}
+
+/* ══════════════════════════════════════
+   MAIN LOOP
+   ══════════════════════════════════════ */
+let lastTime = performance.now();
+
+function loop(now) {
+  const dt = Math.min((now - lastTime) / 1000, 0.1);
+  lastTime = now;
+
+  seaweedPhase += dt * 1.5;
+
+  const w = W(), h = H();
+  ctx.clearRect(0, 0, w, h);
+
+  // Background
+  drawBackground(ctx, now);
+
+  // Bubbles
+  for (const b of bubbles) { b.update(dt); b.draw(ctx); }
+
+  // Decor
+  drawDecor(ctx);
+
+  // Food
+  for (const f of foods) { f.update(dt); f.draw(ctx); }
+  foods = foods.filter(f => f.alive);
+
+  // Fish
+  for (const fi of fishes) { fi.update(dt, foods); fi.draw(ctx); }
+  // Remove dead fish
+  const before = fishes.length;
+  fishes = fishes.filter(fi => fi.alive);
+  if (fishes.length < before) updateFishList();
+
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ══════════════════════════════════════
+   BACKGROUND SELECTOR
+   ══════════════════════════════════════ */
+const swatchesEl = document.getElementById('bg-swatches');
+swatchesEl.style.display = 'flex';
+swatchesEl.style.gap = '6px';
+swatchesEl.style.flexWrap = 'wrap';
+
+BG_PRESETS.forEach((preset, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'bg-btn' + (i === 0 ? ' active' : '');
+  btn.style.background = preset.style;
+  btn.title = preset.label;
+  btn.addEventListener('click', () => {
+    bgImage = null;
+    bgStyle = preset.style;
+    document.querySelectorAll('.bg-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+  swatchesEl.appendChild(btn);
+});
+
+document.getElementById('bg-upload').addEventListener('change', function() {
+  const file = this.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      bgImage = img;
+      document.querySelectorAll('.bg-btn').forEach(b => b.classList.remove('active'));
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  this.value = '';
+});
+
+/* ══════════════════════════════════════
+   ADD FISH BUTTONS
+   ══════════════════════════════════════ */
+const fishButtonsEl = document.getElementById('fish-buttons');
+
+FISH_TYPES.forEach(type => {
+  const btn = document.createElement('button');
+  btn.className = 'add-fish-btn';
+  const dur = type.duration >= 60
+    ? `${Math.floor(type.duration/60)}分${type.duration%60 > 0 ? type.duration%60+'秒' : ''}`
+    : `${type.duration}秒`;
+  btn.innerHTML = `
+    <span class="fish-icon">${type.icon}</span>
+    <span class="fish-name">${type.name}</span>
+    <span class="fish-time">⏱ ${dur}</span>
+  `;
+  btn.addEventListener('click', () => addFish(type));
+  fishButtonsEl.appendChild(btn);
+});
+
+function addFish(type) {
+  if (fishes.length >= 30) {
+    showToast('魚缸已滿！（最多 30 隻）');
+    return;
+  }
+  const fish = new Fish(type);
+  fishes.push(fish);
+  updateFishList();
+}
+
+/* ══════════════════════════════════════
+   FISH LIST (sidebar tags)
+   ══════════════════════════════════════ */
+function updateFishList() {
+  const listEl = document.getElementById('fish-list');
+  listEl.innerHTML = '';
+
+  if (fishes.length === 0) {
+    listEl.innerHTML = '<span class="fish-list-empty">魚缸空空如也，快去添加魚兒吧！</span>';
+    return;
+  }
+
+  for (const fi of fishes) {
+    const secs = Math.ceil(fi.timeLeft);
+    const timeStr = secs >= 60
+      ? `${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}`
+      : `${secs}s`;
+
+    const urgency = fi.timeLeft < 15;
+    const tag = document.createElement('span');
+    tag.className = 'fish-tag';
+    tag.dataset.fishId = fi.id;
+    tag.style.background = urgency
+      ? 'rgba(150,20,20,0.35)'
+      : 'rgba(0,80,160,0.35)';
+    tag.style.borderColor = urgency
+      ? 'rgba(255,80,80,0.4)'
+      : 'rgba(80,160,255,0.3)';
+    tag.style.color = urgency ? '#ffaaaa' : '#c0dcff';
+
+    tag.innerHTML = `
+      <span class="tag-icon">${fi.type.icon}</span>
+      <span class="tag-name">${fi.type.name}</span>
+      <span class="tag-timer">${timeStr}</span>
+    `;
+    fi.tag = tag;
+    listEl.appendChild(tag);
+  }
+}
+
+// Refresh the fish list every second (timers)
+setInterval(() => {
+  if (fishes.length > 0) updateFishList();
+}, 1000);
+
+/* ══════════════════════════════════════
+   CLICK TO DROP FOOD
+   ══════════════════════════════════════ */
+outer.addEventListener('click', e => {
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  // Don't create food if clicking on the controls area
+  if (y > H()) return;
+  spawnFood(x, y);
+});
+
+function spawnFood(x, y) {
+  if (foods.length >= 20) return; // cap food on screen
+  foods.push(new Food(x, y));
+
+  // Ripple visual
+  const ripple = document.createElement('div');
+  ripple.style.cssText = `
+    position:absolute;
+    left:${x}px; top:${y}px;
+    width:16px; height:16px;
+    margin:-8px;
+    border-radius:50%;
+    border:2px solid rgba(255,220,100,0.8);
+    pointer-events:none;
+    z-index:20;
+    animation: rippleOut .5s ease forwards;
+  `;
+  outer.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 600);
+}
+
+// Add ripple keyframe
+const styleTag = document.createElement('style');
+styleTag.textContent = `
+@keyframes rippleOut {
+  0%   { transform: scale(0); opacity: 1; }
+  100% { transform: scale(3); opacity: 0; }
+}
+`;
+document.head.appendChild(styleTag);
+
+/* ══════════════════════════════════════
+   TOAST
+   ══════════════════════════════════════ */
+function showToast(msg) {
+  const TOAST_DISPLAY_MS = 2200, TOAST_FADE_MS = 400;
+  const t = document.createElement('div');
+  t.style.cssText = `
+    position:fixed; bottom:30px; left:50%; transform:translateX(-50%);
+    background:rgba(0,0,0,0.75); color:#fff; padding:8px 20px;
+    border-radius:20px; font-size:0.85rem; z-index:9999;
+    animation: fadeInUp .3s ease;
+  `;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transition = `opacity ${TOAST_FADE_MS}ms`;
+    setTimeout(() => t.remove(), TOAST_FADE_MS);
+  }, TOAST_DISPLAY_MS);
+}
+
+// Extra keyframes
+const s2 = document.createElement('style');
+s2.textContent = `
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateX(-50%) translateY(10px); }
+  to   { opacity:1; transform:translateX(-50%) translateY(0); }
+}
+`;
+document.head.appendChild(s2);
+
+/* ── Initial demo fish ── */
+addFish(FISH_TYPES[0]);
+addFish(FISH_TYPES[1]);
+addFish(FISH_TYPES[4]);
+</script>
+</body>
+</html>
