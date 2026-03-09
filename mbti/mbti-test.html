@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MBTI 人格測驗 — 探索你的性格類型</title>
+<!-- SEO Meta Tags -->
+<meta name="description" content="MBTI 人格測驗 — 透過 20 道情境題，探索你在四個維度的傾向，揭示你的 MBTI 人格類型。">
+<meta name="keywords" content="MBTI, 人格測驗, 性格測試, Myers-Briggs, E/I, S/N, T/F, J/P, 人格類型">
+<meta name="author" content="MBTI 人格測驗">
+<meta property="og:title" content="MBTI 人格測驗 — 探索你的性格類型">
+<meta property="og:description" content="透過 20 道情境題，探索你在四個維度的傾向，揭示你的 MBTI 人格類型。">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MBTI 人格測驗 — 探索你的性格類型">
+<meta name="twitter:description" content="透過 20 道情境題，探索你在四個維度的傾向，揭示你的 MBTI 人格類型。">
+<!-- End of SEO Meta Tags -->
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-deep:    #0b0f1a;
+  --bg-mid:     #141929;
+  --bg-card:    rgba(255,255,255,0.05);
+  --border:     rgba(255,255,255,0.12);
+  --accent:     #7c6fff;
+  --accent-2:   #c084fc;
+  --accent-glow:rgba(124,111,255,0.25);
+  --gold:       #f59e0b;
+  --green:      #22c55e;
+  --red:        #ef4444;
+  --text-1:     #f1f5f9;
+  --text-2:     #94a3b8;
+  --text-3:     #64748b;
+  --radius:     14px;
+  --shadow:     0 8px 32px rgba(0,0,0,0.4);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+  background: linear-gradient(135deg, #0b0f1a 0%, #141929 50%, #0d1220 100%);
+  color: var(--text-1);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Particle background ── */
+.particles {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    radial-gradient(1px 1px at 5%  10%, rgba(200,180,255,.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 20% 80%, rgba(160,130,255,.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 35% 35%, rgba(200,180,255,.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 50% 60%, rgba(160,130,255,.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 65% 20%, rgba(200,180,255,.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 75%, rgba(160,130,255,.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 92% 45%, rgba(200,180,255,.6) 0%, transparent 100%),
+    radial-gradient(2px 2px at 15% 55%, rgba(124,111,255,.3) 0%, transparent 100%),
+    radial-gradient(2px 2px at 70% 30%, rgba(192,132,252,.3) 0%, transparent 100%),
+    radial-gradient(2px 2px at 88% 85%, rgba(124,111,255,.25) 0%, transparent 100%);
+}
+
+/* ── Layout ── */
+#app {
+  position: relative; z-index: 1;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+}
+
+/* ── Screen toggle ── */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ── Start screen ── */
+.start-header {
+  text-align: center;
+  padding: 48px 0 32px;
+}
+.start-logo {
+  font-size: 5rem;
+  margin-bottom: 12px;
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+.start-title {
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  font-weight: 800;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+.start-sub {
+  color: var(--text-2);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+  margin: 32px 0;
+}
+.info-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 14px;
+  text-align: center;
+}
+.info-icon { font-size: 1.8rem; margin-bottom: 8px; }
+.info-label { font-size: 0.78rem; color: var(--text-2); margin-bottom: 4px; }
+.info-value { font-size: 1rem; font-weight: 700; color: var(--accent-2); }
+
+.dimensions-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 28px;
+}
+.dim-title {
+  font-size: 0.85rem;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: 14px;
+}
+.dim-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+.dim-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  font-weight: 800; font-size: 0.85rem;
+  flex-shrink: 0;
+}
+.dim-badge.ei { background: rgba(124,111,255,.25); color: #a78bfa; }
+.dim-badge.sn { background: rgba(34,197,94,.2);   color: #4ade80; }
+.dim-badge.tf { background: rgba(245,158,11,.2);  color: #fbbf24; }
+.dim-badge.jp { background: rgba(239,68,68,.2);   color: #f87171; }
+.dim-desc { color: var(--text-2); }
+
+/* ── Buttons ── */
+.btn-start {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+  box-shadow: 0 4px 20px var(--accent-glow);
+}
+.btn-start:hover { transform: translateY(-2px); box-shadow: 0 6px 28px var(--accent-glow); }
+.btn-start:active { transform: translateY(0); }
+
+/* ── Quiz screen ── */
+.quiz-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.quiz-counter {
+  font-size: 0.85rem;
+  color: var(--text-2);
+  font-weight: 600;
+}
+.quiz-dim-tag {
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: .06em;
+}
+.tag-ei { background: rgba(124,111,255,.2); color: #a78bfa; }
+.tag-sn { background: rgba(34,197,94,.15);  color: #4ade80; }
+.tag-tf { background: rgba(245,158,11,.15); color: #fbbf24; }
+.tag-jp { background: rgba(239,68,68,.15);  color: #f87171; }
+
+/* ── Progress bar ── */
+.progress-wrap {
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  height: 6px;
+  margin-bottom: 28px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transition: width .4s ease;
+}
+
+/* ── Question card ── */
+.question-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+.scenario-label {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  margin-bottom: 14px;
+}
+.scenario-text {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: var(--text-1);
+}
+
+/* ── Options ── */
+.options-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.option-btn {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  text-align: left;
+  color: var(--text-1);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, transform .1s;
+  position: relative;
+  overflow: hidden;
+}
+.option-btn::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: transparent;
+  transition: background .15s;
+}
+.option-btn:hover {
+  border-color: var(--accent);
+  background: rgba(124,111,255,.1);
+  transform: translateX(4px);
+}
+.option-btn:hover::before { background: var(--accent); }
+.option-btn:active { transform: translateX(2px); }
+
+.option-letter {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  font-weight: 800; font-size: 0.8rem;
+  margin-right: 12px;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+.option-btn.selected {
+  border-color: var(--accent);
+  background: rgba(124,111,255,.18);
+  pointer-events: none;
+}
+.option-btn.selected::before { background: var(--accent); }
+.option-btn.dimmed {
+  opacity: .45;
+  pointer-events: none;
+}
+
+/* ── Result screen ── */
+.result-header {
+  text-align: center;
+  padding: 40px 0 28px;
+}
+.result-emoji {
+  font-size: 4.5rem;
+  margin-bottom: 12px;
+  animation: float 3s ease-in-out infinite;
+}
+.mbti-type {
+  font-size: clamp(2.8rem, 8vw, 4rem);
+  font-weight: 900;
+  letter-spacing: .12em;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 6px;
+}
+.mbti-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-1);
+  margin-bottom: 6px;
+}
+.mbti-tagline {
+  font-size: 0.9rem;
+  color: var(--text-2);
+  line-height: 1.5;
+  max-width: 480px;
+  margin: 0 auto 8px;
+}
+
+/* ── Dimension score bars ── */
+.scores-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  margin-bottom: 20px;
+}
+.scores-title {
+  font-size: 0.78rem;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  margin-bottom: 18px;
+}
+.score-row {
+  margin-bottom: 16px;
+}
+.score-row:last-child { margin-bottom: 0; }
+.score-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+}
+.score-left  { font-weight: 700; }
+.score-right { font-weight: 700; color: var(--text-2); }
+.score-left.active  { color: var(--accent-2); }
+.score-right.active { color: var(--accent-2); }
+.score-track {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+  position: relative;
+}
+.score-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width .8s ease;
+}
+.fill-ei { background: linear-gradient(90deg,#7c6fff,#a78bfa); }
+.fill-sn { background: linear-gradient(90deg,#22c55e,#4ade80); }
+.fill-tf { background: linear-gradient(90deg,#f59e0b,#fbbf24); }
+.fill-jp { background: linear-gradient(90deg,#ef4444,#f87171); }
+.score-pct {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  margin-top: 4px;
+}
+
+/* ── Type description card ── */
+.desc-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  margin-bottom: 20px;
+}
+.desc-section-title {
+  font-size: 0.78rem;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  margin-bottom: 14px;
+}
+.trait-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.trait-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: var(--text-2);
+  line-height: 1.4;
+}
+.trait-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+.dot-green  { background: var(--green); }
+.dot-accent { background: var(--accent-2); }
+
+/* ── Retry button ── */
+.btn-retry {
+  display: block;
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+  box-shadow: 0 4px 20px var(--accent-glow);
+  margin-bottom: 12px;
+}
+.btn-retry:hover { transform: translateY(-2px); box-shadow: 0 6px 28px var(--accent-glow); }
+
+.btn-share {
+  display: block;
+  width: 100%;
+  padding: 13px;
+  background: transparent;
+  color: var(--accent-2);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s;
+}
+.btn-share:hover { background: rgba(124,111,255,.1); }
+
+/* ── Transition animation ── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeIn .35s ease forwards; }
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .trait-grid { grid-template-columns: 1fr; }
+  .question-card { padding: 20px 16px; }
+  .option-btn    { padding: 15px 16px; }
+}
+</style>
+</head>
+<body>
+<div class="particles"></div>
+
+<div id="app">
+
+  <!-- ════ START SCREEN ════ -->
+  <section id="screen-start" class="screen active">
+    <div class="start-header">
+      <div class="start-logo">🧠</div>
+      <h1 class="start-title">MBTI 人格測驗</h1>
+      <p class="start-sub">透過 20 道真實情境題，探索你的四個人格維度傾向<br>揭開你獨特的 MBTI 性格類型</p>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-icon">❓</div>
+        <div class="info-label">題目數量</div>
+        <div class="info-value">20 題</div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">🎯</div>
+        <div class="info-label">每維度</div>
+        <div class="info-value">5 題</div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">🔀</div>
+        <div class="info-label">題目模式</div>
+        <div class="info-value">隨機抽題</div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">⏱️</div>
+        <div class="info-label">預估時間</div>
+        <div class="info-value">約 5 分鐘</div>
+      </div>
+    </div>
+
+    <div class="dimensions-card">
+      <div class="dim-title">四大人格維度</div>
+      <div class="dim-row">
+        <span class="dim-badge ei">E/I</span>
+        <span class="dim-desc"><strong>外向 vs 內向</strong> — 你如何補充能量？</span>
+      </div>
+      <div class="dim-row">
+        <span class="dim-badge sn">S/N</span>
+        <span class="dim-desc"><strong>感覺 vs 直覺</strong> — 你如何獲取資訊？</span>
+      </div>
+      <div class="dim-row">
+        <span class="dim-badge tf">T/F</span>
+        <span class="dim-desc"><strong>思考 vs 情感</strong> — 你如何做決定？</span>
+      </div>
+      <div class="dim-row">
+        <span class="dim-badge jp">J/P</span>
+        <span class="dim-desc"><strong>判斷 vs 感知</strong> — 你如何安排生活？</span>
+      </div>
+    </div>
+
+    <button class="btn-start" onclick="startQuiz()">開始測驗 →</button>
+  </section>
+
+  <!-- ════ QUIZ SCREEN ════ -->
+  <section id="screen-quiz" class="screen">
+    <div class="quiz-header">
+      <span class="quiz-counter" id="quiz-counter">第 1 題 / 共 20 題</span>
+      <span class="quiz-dim-tag" id="quiz-dim-tag">E/I</span>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+    </div>
+    <div class="question-card fade-in" id="question-card">
+      <div class="scenario-label">情境描述</div>
+      <p class="scenario-text" id="scenario-text"></p>
+    </div>
+    <div class="options-wrap" id="options-wrap">
+      <button class="option-btn" id="opt-a" onclick="selectOption(0)">
+        <span class="option-letter">A</span>
+        <span id="opt-a-text"></span>
+      </button>
+      <button class="option-btn" id="opt-b" onclick="selectOption(1)">
+        <span class="option-letter">B</span>
+        <span id="opt-b-text"></span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ════ RESULT SCREEN ════ -->
+  <section id="screen-result" class="screen">
+    <div class="result-header">
+      <div class="result-emoji" id="result-emoji">🌟</div>
+      <div class="mbti-type"  id="result-type">INTJ</div>
+      <div class="mbti-name"  id="result-name">建築師</div>
+      <div class="mbti-tagline" id="result-tagline"></div>
+    </div>
+
+    <div class="scores-card">
+      <div class="scores-title">維度分數詳情</div>
+
+      <div class="score-row">
+        <div class="score-labels">
+          <span class="score-left"  id="lbl-e">外向 E</span>
+          <span class="score-right" id="lbl-i">內向 I</span>
+        </div>
+        <div class="score-track">
+          <div class="score-fill fill-ei" id="fill-ei" style="width:50%"></div>
+        </div>
+        <div class="score-pct" id="pct-ei"></div>
+      </div>
+
+      <div class="score-row">
+        <div class="score-labels">
+          <span class="score-left"  id="lbl-s">感覺 S</span>
+          <span class="score-right" id="lbl-n">直覺 N</span>
+        </div>
+        <div class="score-track">
+          <div class="score-fill fill-sn" id="fill-sn" style="width:50%"></div>
+        </div>
+        <div class="score-pct" id="pct-sn"></div>
+      </div>
+
+      <div class="score-row">
+        <div class="score-labels">
+          <span class="score-left"  id="lbl-t">思考 T</span>
+          <span class="score-right" id="lbl-f">情感 F</span>
+        </div>
+        <div class="score-track">
+          <div class="score-fill fill-tf" id="fill-tf" style="width:50%"></div>
+        </div>
+        <div class="score-pct" id="pct-tf"></div>
+      </div>
+
+      <div class="score-row">
+        <div class="score-labels">
+          <span class="score-left"  id="lbl-j">判斷 J</span>
+          <span class="score-right" id="lbl-p">感知 P</span>
+        </div>
+        <div class="score-track">
+          <div class="score-fill fill-jp" id="fill-jp" style="width:50%"></div>
+        </div>
+        <div class="score-pct" id="pct-jp"></div>
+      </div>
+    </div>
+
+    <div class="desc-card">
+      <div class="desc-section-title">性格特質</div>
+      <div class="trait-grid" id="trait-grid"></div>
+    </div>
+
+    <button class="btn-retry" onclick="startQuiz()">🔄 重新測驗</button>
+    <button class="btn-share" onclick="shareResult()">📤 分享結果</button>
+  </section>
+
+</div><!-- #app -->
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  QUESTION BANK  (10 questions per dimension, pick 5)
+//  dimension: 'EI' | 'SN' | 'TF' | 'JP'
+//  options[0] → first letter of dimension  (E / S / T / J)
+//  options[1] → second letter of dimension (I / N / F / P)
+// ═══════════════════════════════════════════════════════
+const QUESTIONS = {
+  EI: [
+    {
+      scenario: "週末終於沒有行程，你最理想的放鬆方式是什麼？",
+      options: [
+        "找幾個朋友出去吃飯、唱歌，熱鬧一整天才算充電完畢。",
+        "一個人待在家裡看書、追劇或做喜歡的事，靜靜恢復精力。"
+      ]
+    },
+    {
+      scenario: "你被指派主持一場公司年會，你的第一反應是？",
+      options: [
+        "感到興奮，這是展現自己、與大家互動的好機會！",
+        "有點緊張，雖然會盡力，但更希望能在幕後協助。"
+      ]
+    },
+    {
+      scenario: "在一個你不太認識人的派對上，你通常會怎麼做？",
+      options: [
+        "主動找人搭話，很快就能融入氣氛，認識新朋友很有趣。",
+        "找個安靜的角落，等熟人來找你，或者和一兩個人深聊。"
+      ]
+    },
+    {
+      scenario: "你在一個需要大量獨立研究的長期專案中，你的感受是？",
+      options: [
+        "有點孤單，希望能多和團隊討論、交流想法。",
+        "很享受這種可以深入思考、不被打擾的工作方式。"
+      ]
+    },
+    {
+      scenario: "當你遇到難題時，你習慣如何思考？",
+      options: [
+        "找人聊聊，在對話中理清思路，和他人討論讓你靈感大爆發。",
+        "自己先獨立思考，把想法整理好後才去尋求意見。"
+      ]
+    },
+    {
+      scenario: "公司舉辦自願參加的聯誼活動，你會怎麼做？",
+      options: [
+        "積極報名，這類活動讓你精力充沛。",
+        "視心情決定，如果參加也會盡早離開，回家補眠。"
+      ]
+    },
+    {
+      scenario: "在電話裡處理複雜問題和寫電子郵件來回溝通，你更偏好哪種？",
+      options: [
+        "打電話，即時互動、來回確認更有效率。",
+        "寫信，可以仔細整理想法，不用即時反應。"
+      ]
+    },
+    {
+      scenario: "你的朋友描述你在社交場合的模樣最可能是？",
+      options: [
+        "「他/她總是最活躍的那個，很容易和陌生人打成一片。」",
+        "「他/她比較安靜，但聊深了之後非常有內涵。」"
+      ]
+    },
+    {
+      scenario: "一整天都在開會和與人交流後，你通常感到？",
+      options: [
+        "精神飽滿，和人互動讓你充滿活力。",
+        "身心俱疲，需要獨處才能恢復。"
+      ]
+    },
+    {
+      scenario: "你比較喜歡哪種工作環境？",
+      options: [
+        "開放式辦公室，大家可以隨時互動討論。",
+        "安靜的獨立空間，讓你專心、減少干擾。"
+      ]
+    }
+  ],
+
+  SN: [
+    {
+      scenario: "你在規劃一趟旅行，你會怎麼安排行程？",
+      options: [
+        "查好每個景點的評分、開放時間、交通方式，行程排得清清楚楚。",
+        "大致知道想去哪個城市，細節到了再說，享受探索的驚喜。"
+      ]
+    },
+    {
+      scenario: "你在閱讀一本關於未來科技的書，最吸引你的部分是？",
+      options: [
+        "目前已實際應用的技術案例和數據。",
+        "對未來十年可能出現的突破性創新的暢想。"
+      ]
+    },
+    {
+      scenario: "你的同事提出一個想法，你傾向先問哪個問題？",
+      options: [
+        "「這個具體怎麼執行？目前有哪些資源和限制？」",
+        "「這個想法背後更大的願景是什麼？能延伸到哪裡？」"
+      ]
+    },
+    {
+      scenario: "學習新技能時，你比較喜歡哪種方式？",
+      options: [
+        "跟著步驟清楚的教學，按部就班地學。",
+        "先了解整體概念，然後自己摸索和實驗。"
+      ]
+    },
+    {
+      scenario: "朋友請你描述昨天的一件事，你更可能怎麼說？",
+      options: [
+        "具體講述發生了什麼、何時何地、細節鉅細靡遺。",
+        "先說整體感受或這件事讓你想到的更深層意義。"
+      ]
+    },
+    {
+      scenario: "你在做決策時，最倚賴哪種資訊？",
+      options: [
+        "過去的經驗和已有的具體事實。",
+        "直覺和對未來趨勢的預測。"
+      ]
+    },
+    {
+      scenario: "面對一道沒有標準答案的創意題目，你的反應是？",
+      options: [
+        "先參考有哪些現成的解法，再從中挑選最實用的。",
+        "享受天馬行空地腦力激盪，越新奇越好。"
+      ]
+    },
+    {
+      scenario: "你更喜歡哪種類型的工作？",
+      options: [
+        "有具體流程可依循、結果可衡量的工作。",
+        "需要發想、概念化、探索可能性的工作。"
+      ]
+    },
+    {
+      scenario: "你在看一部電影，最讓你回味的是？",
+      options: [
+        "真實的拍攝地點、歷史背景等細節考究。",
+        "電影所傳達的隱喻和更深層的象徵意義。"
+      ]
+    },
+    {
+      scenario: "別人形容你的思維方式最可能是？",
+      options: [
+        "「很務實，善於掌握細節，不容易犯錯。」",
+        "「很有創意，充滿想像力，思考跳躍式。」"
+      ]
+    }
+  ],
+
+  TF: [
+    {
+      scenario: "好友向你訴說在工作上受到了委屈，你第一反應是？",
+      options: [
+        "幫他分析事情的來龍去脈，提出可行的解決辦法。",
+        "先給他一個擁抱或表示理解，讓他知道你在乎他的感受。"
+      ]
+    },
+    {
+      scenario: "你是主管，需要評估一位表現普通但很努力的員工，你會？",
+      options: [
+        "如實給出客觀評分，表現就是表現，不因努力加分。",
+        "適度考量他的努力和進步幅度，給予鼓勵性的評分。"
+      ]
+    },
+    {
+      scenario: "與人發生意見衝突時，你最在意的是？",
+      options: [
+        "找到邏輯上最正確的結論，讓事情得到合理的解決。",
+        "維護雙方的關係，讓每個人都感到被尊重和理解。"
+      ]
+    },
+    {
+      scenario: "你在選購大型家電，促銷員熱情服務但產品評價普通，你會？",
+      options: [
+        "客觀比較規格和評價，選擇性價比最高的，不受服務態度影響。",
+        "考量促銷員的熱情付出，如果產品差距不大，傾向支持他。"
+      ]
+    },
+    {
+      scenario: "朋友問你對他創業計畫的看法，你認為計畫有明顯漏洞，你會？",
+      options: [
+        "直接指出問題，清楚說明哪裡有風險，真正的幫助是誠實。",
+        "先肯定他的勇氣和優點，再溫和地提出疑慮。"
+      ]
+    },
+    {
+      scenario: "你覺得一段關係最重要的基礎是？",
+      options: [
+        "相互尊重和理性溝通，彼此能理解彼此的立場。",
+        "情感上的連結和支持，在任何時候都能感受到溫暖。"
+      ]
+    },
+    {
+      scenario: "做一個影響他人的重要決定時，你更看重？",
+      options: [
+        "長遠來看對整體最有利的結果，即使短期會讓人不舒服。",
+        "盡可能顧及所有人的感受，維持和諧是很重要的考量。"
+      ]
+    },
+    {
+      scenario: "別人稱讚你最可能是因為？",
+      options: [
+        "「你分析問題很準確，很理性，不容易被情緒左右。」",
+        "「你非常有同理心，讓人覺得被理解和重視。」"
+      ]
+    },
+    {
+      scenario: "你在看一部悲劇電影，你的反應通常是？",
+      options: [
+        "思考故事結構和角色的選擇邏輯，比較不容易落淚。",
+        "很容易被角色的情感感染，常常哭得很慘。"
+      ]
+    },
+    {
+      scenario: "你認為批評一個人最重要的原則是？",
+      options: [
+        "準確且具體，指出真實的問題才能幫助對方改進。",
+        "溫柔且顧慮對方感受，先讓對方願意聆聽才有效。"
+      ]
+    }
+  ],
+
+  JP: [
+    {
+      scenario: "你有一個需要兩週完成的專案，你會怎麼做？",
+      options: [
+        "第一天就制定詳細計畫，分配每天的工作量，嚴格執行。",
+        "先了解整體需求，在截止日期前根據狀況靈活調整進度。"
+      ]
+    },
+    {
+      scenario: "朋友臨時問你明天要不要去爬山，你的感受是？",
+      options: [
+        "有點抗拒，你的週末已有安排，臨時改計畫讓你不舒服。",
+        "沒問題！臨時的行程反而更有趣，馬上答應。"
+      ]
+    },
+    {
+      scenario: "你的桌面和工作空間通常是什麼樣子？",
+      options: [
+        "整潔有序，每件物品都有固定位置，東西亂了你會很不安。",
+        "看起來雜亂，但你知道每樣東西在哪，「創意的混亂」。"
+      ]
+    },
+    {
+      scenario: "你在購物時通常的模式是？",
+      options: [
+        "事先列好購物清單，按清單購買，避免衝動消費。",
+        "邊逛邊決定要買什麼，常常買了沒事先想到的東西。"
+      ]
+    },
+    {
+      scenario: "面對一個截止日期，你的習慣是？",
+      options: [
+        "盡早完成，有充裕的緩衝時間才踏實，不喜歡趕工。",
+        "在截止日期的壓力下靈感最好，常在最後關頭完成。"
+      ]
+    },
+    {
+      scenario: "你和朋友約好週末要做一件事，臨行前你？",
+      options: [
+        "確認好時間、地點、交通，一切都安排妥當再出門。",
+        "大概知道要去哪就出發了，細節到時再說。"
+      ]
+    },
+    {
+      scenario: "你更享受哪種工作節奏？",
+      options: [
+        "有清楚的時間表和里程碑，按計畫穩步推進。",
+        "保持彈性，根據情況隨時調整，不被固定框架限制。"
+      ]
+    },
+    {
+      scenario: "當你有很多事要做，你的策略是？",
+      options: [
+        "馬上列出待辦清單，按優先序逐一完成，有條不紊。",
+        "先做最感興趣或最重要的，其他的看情況處理。"
+      ]
+    },
+    {
+      scenario: "你對「計劃趕不上變化」這句話的態度是？",
+      options: [
+        "正因為如此，計畫要更詳盡才能應對各種變化。",
+        "計畫太詳細反而會束縛自己，保持彈性才是王道。"
+      ]
+    },
+    {
+      scenario: "你在一個長假結束後回到工作，你的第一件事是？",
+      options: [
+        "迅速整理待辦事項和郵件，讓自己回到有條理的狀態。",
+        "慢慢適應，沒有立刻整理的衝動，事情自然會處理。"
+      ]
+    }
+  ]
+};
+
+// ═══════════════════════════════════════════════════════
+//  MBTI TYPE DATABASE
+// ═══════════════════════════════════════════════════════
+const MBTI_TYPES = {
+  INTJ: { name: "建築師",    emoji: "🏛️",  tagline: "策略縝密、意志堅定的規劃者，對未來有清晰的願景，以高效率將想法化為現實。", traits: ["長遠規劃能力強", "獨立自主", "批判性思維", "追求卓越", "善於分析問題", "目標導向"] },
+  INTP: { name: "邏輯學家",  emoji: "🔬",  tagline: "充滿好奇心的創新思考者，熱愛探索複雜的理論，以邏輯解構世界的奧秘。",        traits: ["邏輯分析能力強", "創新思維", "求知慾旺盛", "靈活變通", "喜愛抽象概念", "解決複雜問題"] },
+  ENTJ: { name: "指揮官",    emoji: "⚔️",  tagline: "天生的領導者，果斷、充滿魄力，擅長整合資源和制定策略，帶領團隊達成目標。",  traits: ["天生領導力", "決策果斷", "目標設定明確", "激勵他人", "戰略思維", "執行力強"] },
+  ENTP: { name: "辯論家",    emoji: "💡",  tagline: "聰明機敏的思想家，熱愛辯論和挑戰傳統觀念，以創意和口才影響周圍的人。",    traits: ["創意思維", "辯才無礙", "適應力強", "喜歡挑戰", "善於即興", "人際網路廣"] },
+  INFJ: { name: "提倡者",    emoji: "🌿",  tagline: "稀有的理想主義者，有強烈的價值觀和使命感，默默地以善意影響世界。",          traits: ["洞察力強", "有遠見", "關懷他人", "追求意義", "善於傾聽", "創意寫作能力"] },
+  INFP: { name: "調停者",    emoji: "🌸",  tagline: "富有同理心的理想主義者，重視真誠與個人成長，在混亂中尋找美與和諧。",        traits: ["強烈的同理心", "創造力豐富", "忠於自身價值", "善於傾聽", "熱愛寫作和藝術", "追求真實"] },
+  ENFJ: { name: "主人公",    emoji: "🌟",  tagline: "充滿魅力的天生領袖，真誠地關心他人的成長，以熱忱和同理心激勵周圍的人。",  traits: ["激勵他人", "有組織力", "同理心強", "擅長溝通", "有感染力", "關注他人需求"] },
+  ENFP: { name: "競選者",    emoji: "🎉",  tagline: "熱情洋溢的自由靈魂，充滿創意和好奇心，以真誠和能量感染身邊的每個人。",    traits: ["熱情充沛", "創意無限", "擅長激勵", "善交朋友", "看見潛力", "擁抱可能性"] },
+  ISTJ: { name: "物流師",    emoji: "📋",  tagline: "可靠盡責的傳統守護者，重視規則和秩序，以踏實的行動履行每一項承諾。",      traits: ["可靠盡責", "重視規則", "細心謹慎", "有始有終", "忠誠穩定", "組織能力強"] },
+  ISFJ: { name: "守衛者",    emoji: "🛡️",  tagline: "溫暖細心的守護者，默默付出、記住所有細節，以行動展現對他人深沉的關愛。",  traits: ["默默付出", "記憶細節", "忠誠可靠", "照顧他人", "謙遜低調", "責任感強"] },
+  ESTJ: { name: "總經理",    emoji: "💼",  tagline: "實際果斷的管理者，以秩序和效率著稱，善於組織人員和資源實現具體目標。",    traits: ["組織力強", "重視效率", "決策果斷", "尊重傳統", "負責任", "擅長管理"] },
+  ESFJ: { name: "執政官",    emoji: "🤝",  tagline: "關懷備至的社交能手，重視和諧和歸屬感，以真誠的熱情讓周圍的人感到被重視。", traits: ["熱忱好客", "關心他人", "重視和諧", "可靠守信", "善於合作", "觀察入微"] },
+  ISTP: { name: "鑑賞家",    emoji: "🔧",  tagline: "冷靜大膽的工匠，以靈活和觀察力應對任何挑戰，擅長即興解決實際問題。",      traits: ["動手能力強", "冷靜鎮定", "靈活應變", "善於分析", "獨立自主", "喜愛實作"] },
+  ISFP: { name: "探險家",    emoji: "🎨",  tagline: "溫柔靈活的藝術靈魂，活在當下、享受感官體驗，以獨特的美感詮釋生活。",      traits: ["活在當下", "藝術感強", "溫和友善", "欣賞美麗", "適應力強", "尊重個人自由"] },
+  ESTP: { name: "企業家",    emoji: "⚡",  tagline: "充滿活力的行動派，以敏銳的感知和果斷的行動享受當下，活在真實的世界裡。",  traits: ["行動力強", "觀察敏銳", "應變迅速", "擅長交際", "享受冒險", "解決問題"] },
+  ESFP: { name: "表演者",    emoji: "🎭",  tagline: "充滿活力的自發主義者，享受生活的每個瞬間，以熱情和幽默讓身邊的人歡笑。",  traits: ["充滿活力", "享受當下", "善於娛樂", "溫暖友善", "自發行動", "人際關係佳"] }
+};
+
+// ═══════════════════════════════════════════════════════
+//  GAME STATE
+// ═══════════════════════════════════════════════════════
+let questions   = [];   // shuffled question list for this session
+let current     = 0;    // current question index
+let scores      = { E:0, I:0, S:0, N:0, T:0, F:0, J:0, P:0 };
+
+// ═══════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickN(arr, n) {
+  return shuffle(arr).slice(0, n);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════
+//  START QUIZ
+// ═══════════════════════════════════════════════════════
+function startQuiz() {
+  // Reset scores
+  scores = { E:0, I:0, S:0, N:0, T:0, F:0, J:0, P:0 };
+  current = 0;
+
+  // Pick 5 questions per dimension and tag them
+  const pool = [];
+  const dims = [
+    { key: 'EI', letters: ['E','I'], tag: 'E/I', tagClass: 'tag-ei' },
+    { key: 'SN', letters: ['S','N'], tag: 'S/N', tagClass: 'tag-sn' },
+    { key: 'TF', letters: ['T','F'], tag: 'T/F', tagClass: 'tag-tf' },
+    { key: 'JP', letters: ['J','P'], tag: 'J/P', tagClass: 'tag-jp' }
+  ];
+  dims.forEach(d => {
+    pickN(QUESTIONS[d.key], 5).forEach(q => {
+      pool.push({ ...q, dim: d });
+    });
+  });
+
+  // Shuffle the combined list
+  questions = shuffle(pool);
+
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER QUESTION
+// ═══════════════════════════════════════════════════════
+function renderQuestion() {
+  const q = questions[current];
+
+  // Header
+  document.getElementById('quiz-counter').textContent = `第 ${current + 1} 題 / 共 20 題`;
+  const tagEl = document.getElementById('quiz-dim-tag');
+  tagEl.textContent  = q.dim.tag;
+  tagEl.className    = `quiz-dim-tag ${q.dim.tagClass}`;
+
+  // Progress
+  document.getElementById('progress-bar').style.width = `${(current / 20) * 100}%`;
+
+  // Question card animation
+  const card = document.getElementById('question-card');
+  card.classList.remove('fade-in');
+  void card.offsetWidth; // reflow
+  card.classList.add('fade-in');
+
+  // Text
+  document.getElementById('scenario-text').textContent = q.scenario;
+  document.getElementById('opt-a-text').textContent    = q.options[0];
+  document.getElementById('opt-b-text').textContent    = q.options[1];
+
+  // Reset buttons
+  const btnA = document.getElementById('opt-a');
+  const btnB = document.getElementById('opt-b');
+  btnA.className = 'option-btn';
+  btnB.className = 'option-btn';
+}
+
+// ═══════════════════════════════════════════════════════
+//  SELECT OPTION
+// ═══════════════════════════════════════════════════════
+function selectOption(idx) {
+  const q = questions[current];
+  const chosen  = q.dim.letters[idx];
+  scores[chosen]++;
+
+  // Visual feedback
+  const btnA = document.getElementById('opt-a');
+  const btnB = document.getElementById('opt-b');
+  if (idx === 0) { btnA.classList.add('selected'); btnB.classList.add('dimmed'); }
+  else           { btnB.classList.add('selected'); btnA.classList.add('dimmed'); }
+
+  // Advance after brief delay
+  setTimeout(() => {
+    current++;
+    if (current >= 20) showResult();
+    else               renderQuestion();
+  }, 320);
+}
+
+// ═══════════════════════════════════════════════════════
+//  SHOW RESULT
+// ═══════════════════════════════════════════════════════
+function showResult() {
+  const type = (scores.E >= scores.I ? 'E' : 'I') +
+               (scores.S >= scores.N ? 'S' : 'N') +
+               (scores.T >= scores.F ? 'T' : 'F') +
+               (scores.J >= scores.P ? 'J' : 'P');
+
+  const info = MBTI_TYPES[type];
+
+  document.getElementById('result-type').textContent    = type;
+  document.getElementById('result-name').textContent    = info.name;
+  document.getElementById('result-emoji').textContent   = info.emoji;
+  document.getElementById('result-tagline').textContent = info.tagline;
+
+  // Score bars  (percentage = first letter's score out of 5)
+  function setBar(fillId, pctId, lblFirst, lblSecond, scoreFirst, scoreSecond, fillClass) {
+    const total = scoreFirst + scoreSecond;
+    const pct   = total > 0 ? Math.round((scoreFirst / total) * 100) : 50;
+    document.getElementById(fillId).style.width = pct + '%';
+    document.getElementById(pctId).textContent  =
+      `${lblFirst} ${scoreFirst} 分 vs ${lblSecond} ${scoreSecond} 分`;
+
+    // Highlight winning letter
+    const firstLabel  = document.getElementById(`lbl-${lblFirst.toLowerCase()}`);
+    const secondLabel = document.getElementById(`lbl-${lblSecond.toLowerCase()}`);
+    firstLabel.classList.toggle('active',  scoreFirst >= scoreSecond);
+    secondLabel.classList.toggle('active', scoreSecond >  scoreFirst);
+  }
+
+  setBar('fill-ei', 'pct-ei', 'E', 'I', scores.E, scores.I, 'fill-ei');
+  setBar('fill-sn', 'pct-sn', 'S', 'N', scores.S, scores.N, 'fill-sn');
+  setBar('fill-tf', 'pct-tf', 'T', 'F', scores.T, scores.F, 'fill-tf');
+  setBar('fill-jp', 'pct-jp', 'J', 'P', scores.J, scores.P, 'fill-jp');
+
+  // Traits
+  const grid = document.getElementById('trait-grid');
+  grid.innerHTML = info.traits.map((t, i) => `
+    <div class="trait-item">
+      <span class="trait-dot ${i % 2 === 0 ? 'dot-green' : 'dot-accent'}"></span>
+      <span>${t}</span>
+    </div>`).join('');
+
+  showScreen('screen-result');
+
+  // Animate bars
+  setTimeout(() => {
+    document.querySelectorAll('.score-fill').forEach(el => {
+      const w = el.style.width;
+      el.style.width = '0%';
+      setTimeout(() => { el.style.width = w; }, 50);
+    });
+  }, 100);
+}
+
+// ═══════════════════════════════════════════════════════
+//  SHARE
+// ═══════════════════════════════════════════════════════
+function shareResult() {
+  const type = document.getElementById('result-type').textContent;
+  const name = document.getElementById('result-name').textContent;
+  const text = `我的 MBTI 類型是 ${type}（${name}）！E:${scores.E} I:${scores.I} | S:${scores.S} N:${scores.N} | T:${scores.T} F:${scores.F} | J:${scores.J} P:${scores.P}\n快來測試你的類型：${location.href}`;
+
+  if (navigator.share) {
+    navigator.share({ title: 'MBTI 人格測驗結果', text }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(text).then(() => {
+      alert('結果已複製到剪貼簿！');
+    }).catch(() => {
+      alert(text);
+    });
+  }
+}
+</script>
+</body>
+</html>
