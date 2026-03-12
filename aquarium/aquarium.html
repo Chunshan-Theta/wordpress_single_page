@@ -400,7 +400,7 @@ class Fish {
     this.maxSize   = type.baseSize * 2.5;
     this.x         = Math.random() * (W() - 80) + 40;
     this.y         = 80 + Math.random() * (H() - 160);
-    this.vx        = (Math.random() * 1.2 + 0.5) * (Math.random() < 0.5 ? 1 : -1);
+    this.vx        = (Math.random() * 0.5 + 0.2) * (Math.random() < 0.5 ? 1 : -1);
     this.vy        = 0;
     this.angle     = 0;          // tail wiggle phase
     this.wobble    = Math.random() * Math.PI * 2;
@@ -454,21 +454,22 @@ class Fish {
       }
 
       if (this.target && this.target.alive) {
+        // Fast, direct chase toward food
         const dx = this.target.x - this.x;
         const dy = this.target.y - this.y;
         const d  = Math.hypot(dx, dy);
-        const speed = Math.min(3.5, 60 / d);
+        const speed = d < 10 ? d * 0.5 : 5.0;
         this.vx = (dx / d) * speed;
         this.vy = (dy / d) * speed;
       } else {
-        // natural drift
-        if (Math.random() < 0.008) {
-          this.vx += (Math.random() - 0.5) * 0.8;
-          this.vy += (Math.random() - 0.5) * 0.4;
+        // Slow, natural drift — occasional gentle direction nudge
+        if (Math.random() < 0.004) {
+          this.vx += (Math.random() - 0.5) * 0.3;
+          this.vy += (Math.random() - 0.5) * 0.15;
         }
-        this.vy += Math.sin(this.wobble) * 0.04;
-        this.vx = Math.max(-2.5, Math.min(2.5, this.vx));
-        this.vy = Math.max(-1.5, Math.min(1.5, this.vy));
+        this.vy += Math.sin(this.wobble) * 0.02;
+        this.vx = Math.max(-1.2, Math.min(1.2, this.vx));
+        this.vy = Math.max(-0.7, Math.min(0.7, this.vy));
       }
     }
 
@@ -494,6 +495,11 @@ class Fish {
         this.size = Math.min(this.maxSize, this.size * 1.12);
         this.eating = 0.4;
         this.target = null;
+        this.timeLeft += 180; // eating food adds 3 minutes
+        if (this.leaving) {
+          this.leaving   = false;
+          this.leaveTimer = 0;
+        }
       }
     }
   }
@@ -576,28 +582,6 @@ class Fish {
     ctx.fill();
 
     ctx.restore();
-
-    // Timer badge
-    if (!this.leaving && this.timeLeft > 0) {
-      const secs = Math.ceil(this.timeLeft);
-      const badgeText = secs >= 60
-        ? `${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}`
-        : `${secs}s`;
-      const urgency = this.timeLeft < 15;
-      ctx.save();
-      ctx.font = `bold ${Math.max(9, s * 0.45)}px sans-serif`;
-      ctx.textAlign = 'center';
-      const bw = ctx.measureText(badgeText).width + 8;
-      const bh = Math.max(9, s * 0.45) + 6;
-      const bx = this.x - bw / 2;
-      const by = this.y - s - bh - 4;
-      ctx.fillStyle = urgency ? 'rgba(200,30,30,0.82)' : 'rgba(0,0,0,0.55)';
-      _roundRect(ctx, bx, by, bw, bh, 4);
-      ctx.fill();
-      ctx.fillStyle = urgency ? '#ffdddd' : '#d0eeff';
-      ctx.fillText(badgeText, this.x, by + bh - 4);
-      ctx.restore();
-    }
   }
 }
 
@@ -622,7 +606,7 @@ class Food {
   constructor(x, y) {
     this.x     = x;
     this.y     = y;
-    this.vy    = 0.3;
+    this.vy    = 0.1;
     this.size  = 5;
     this.alive = true;
     this.wobble = 0;
@@ -632,10 +616,12 @@ class Food {
     if (!this.alive) return;
     this.age += dt;
     this.wobble += dt * 3;
-    this.vy = Math.min(1.6, this.vy + 0.015);
+    this.vy = Math.min(0.7, this.vy + 0.004);
     this.x += Math.sin(this.wobble) * 0.3;
     this.y += this.vy;
-    if (this.y > H() - 8) { this.y = H() - 8; this.vy = 0; }
+    // Stop at 70% of tank height — keeps food reachable and off the sand
+    const stopY = H() * 0.70;
+    if (this.y > stopY) { this.y = stopY; this.vy = 0; }
     if (this.age > 12) this.alive = false; // expires after 12s if uneaten
   }
   draw(ctx) {
@@ -921,38 +907,56 @@ function addFish(type) {
    ══════════════════════════════════════ */
 function updateFishList() {
   const listEl = document.getElementById('fish-list');
-  listEl.innerHTML = '';
 
   if (fishes.length === 0) {
     listEl.innerHTML = '<span class="fish-list-empty">魚缸空空如也，快去添加魚兒吧！</span>';
     return;
   }
 
-  for (const fi of fishes) {
-    const secs = Math.ceil(fi.timeLeft);
-    const timeStr = secs >= 60
-      ? `${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}`
-      : `${secs}s`;
+  // Determine if the set of fish IDs has changed (full rebuild needed)
+  const existingTags = listEl.querySelectorAll('.fish-tag');
+  const existingIds  = new Set([...existingTags].map(t => t.dataset.fishId));
+  const needsRebuild = existingTags.length !== fishes.length ||
+    fishes.some(f => !existingIds.has(String(f.id)));
 
-    const urgency = fi.timeLeft < 15;
-    const tag = document.createElement('span');
-    tag.className = 'fish-tag';
-    tag.dataset.fishId = fi.id;
-    tag.style.background = urgency
-      ? 'rgba(150,20,20,0.35)'
-      : 'rgba(0,80,160,0.35)';
-    tag.style.borderColor = urgency
-      ? 'rgba(255,80,80,0.4)'
-      : 'rgba(80,160,255,0.3)';
-    tag.style.color = urgency ? '#ffaaaa' : '#c0dcff';
-
-    tag.innerHTML = `
-      <span class="tag-icon">${fi.type.icon}</span>
-      <span class="tag-name">${fi.type.name}</span>
-      <span class="tag-timer">${timeStr}</span>
-    `;
-    fi.tag = tag;
-    listEl.appendChild(tag);
+  if (needsRebuild) {
+    listEl.innerHTML = '';
+    for (const fi of fishes) {
+      const secs    = Math.ceil(fi.timeLeft);
+      const timeStr = secs >= 60
+        ? `${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}`
+        : `${secs}s`;
+      const urgency = fi.timeLeft < 15;
+      const tag = document.createElement('span');
+      tag.className = 'fish-tag';
+      tag.dataset.fishId = fi.id;
+      tag.style.background   = urgency ? 'rgba(150,20,20,0.35)'  : 'rgba(0,80,160,0.35)';
+      tag.style.borderColor  = urgency ? 'rgba(255,80,80,0.4)'   : 'rgba(80,160,255,0.3)';
+      tag.style.color        = urgency ? '#ffaaaa' : '#c0dcff';
+      tag.innerHTML = `
+        <span class="tag-icon">${fi.type.icon}</span>
+        <span class="tag-name">${fi.type.name}</span>
+        <span class="tag-timer">${timeStr}</span>
+      `;
+      fi.tag = tag;
+      listEl.appendChild(tag);
+    }
+  } else {
+    // Lightweight in-place update — only change text and urgency styles
+    for (const fi of fishes) {
+      const tag = listEl.querySelector(`[data-fish-id="${fi.id}"]`);
+      if (!tag) continue;
+      const secs    = Math.ceil(fi.timeLeft);
+      const timeStr = secs >= 60
+        ? `${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}`
+        : `${secs}s`;
+      const urgency = fi.timeLeft < 15;
+      const timerEl = tag.querySelector('.tag-timer');
+      if (timerEl) timerEl.textContent = timeStr;
+      tag.style.background  = urgency ? 'rgba(150,20,20,0.35)'  : 'rgba(0,80,160,0.35)';
+      tag.style.borderColor = urgency ? 'rgba(255,80,80,0.4)'   : 'rgba(80,160,255,0.3)';
+      tag.style.color       = urgency ? '#ffaaaa' : '#c0dcff';
+    }
   }
 }
 
