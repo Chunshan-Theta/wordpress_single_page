@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>2026 最新｜租屋 vs 買房投報率計算機：用真實利率與機會成本算給你看</title>
+    <meta name="description" content="打破「租屋是幫房東繳房貸」的迷思。整合 2025-2026 最新實價登錄行情與 2.5%~3% 房貸利率，透過「首年純利息」與「租金」正面對決，一鍵精算買房與租屋的真實機會成本與投資報酬率。">
+    <meta name="keywords" content="租屋買房比較, 房價租金比, 投報率計算機, 買房頭期款, 房貸利率試算, 2026房價行情, 實價登錄估價, 租金回報率, 投資理財, 機會成本, 0050">
+    <meta name="author" content="Data Driven Real Estate">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://lazyinwork.com/">
+    <meta property="og:title" content="2026 最新｜租屋 vs 買房投報率計算機">
+    <meta property="og:description" content="輸入區域與租金，立刻算出「繳給銀行的利息」與「繳給房東的租金」差距，找出資產最大化的決策。">
+
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="2026 最新｜租屋 vs 買房投報率計算機">
+    <meta property="twitter:description" content="打破迷思，用真實房貸利率與大盤機會成本，精算租與買的真實投報率。">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .result-card { transition: all 0.3s ease; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans p-4 md:p-8">
+    <div class="max-w-4xl mx-auto space-y-8">
+        
+        <header class="text-center space-y-4">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">租屋 vs 買房：真實投報率計算機</h1>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">不再憑直覺決策。輸入您的預期租金或鎖定區域，系統將以量化數據為您揭露最真實的資金效益。</p>
+        </header>
+
+        <section class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800 border-b pb-2">📊 核心演算邏輯與資料背景</h2>
+            <div class="grid md:grid-cols-3 gap-6 text-sm text-gray-600">
+                <div>
+                    <h3 class="font-bold text-gray-800 mb-2 flex items-center">📈 區域行情資料庫</h3>
+                    <p>內建「模式二」估價系統，行情基準已對標 <strong>2025 年至 2026 年初內政部實價登錄</strong>之加權平均單價，涵蓋新成屋與中古屋市場真實交易軌跡。</p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-800 mb-2 flex items-center">🏦 房貸利息對決</h3>
+                    <p>拋棄傳統粗略的「房價租金比」。本系統以當前 <strong>2.5% ~ 3% 的真實房貸利率</strong>，精算「首年 8 成房貸純利息支出」對決「整年總租金」，精確判定沉沒成本。</p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-800 mb-2 flex items-center">⚖️ 資金機會成本</h3>
+                    <p>買房會鎖死 20% 頭期款與高額月付金。若評定結果為「租屋較佳」，代表將同等資金投入如 <strong>0050（估投報率5%）</strong>等長期大盤 ETF 標的，資產增長將完勝買房。</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="bg-gray-800 text-white p-5 rounded-xl shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+                <h2 class="font-bold text-lg">⚙️ 當前房貸環境設定</h2>
+                <p class="text-sm text-gray-300">預設貸款成數 8 成，依此計算首年純利息成本作為比較基準</p>
+            </div>
+            <div class="flex items-center bg-gray-700 p-2 rounded-lg w-full sm:w-auto">
+                <label class="mr-3 font-medium whitespace-nowrap">房貸利率：</label>
+                <input type="number" id="mortgageRate" class="w-24 border-none p-1.5 text-right rounded text-gray-900 font-bold focus:ring-2 focus:ring-blue-400" value="2.5" step="0.1">
+                <span class="ml-2">%</span>
+            </div>
+            <div class="flex items-center bg-gray-700 p-2 rounded-lg w-full sm:w-auto">
+                <label class="mr-3 font-medium whitespace-nowrap">股票投資預期報酬率：</label>
+                <input type="number" id="stockRate" class="w-24 border-none p-1.5 text-right rounded text-gray-900 font-bold focus:ring-2 focus:ring-blue-400" value="5.0" step="0.1">
+                <span class="ml-2">%</span>
+            </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6">
+            <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-500">
+                <h2 class="text-xl font-bold mb-4 text-blue-600">模式一：精確數值計算</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-gray-700">房屋總價 (萬)</label>
+                        <input type="number" id="price1" class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none" placeholder="例如：2500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-gray-700">每月房租總和 (元/含管理費)</label>
+                        <input type="number" id="rent1" class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none" placeholder="例如：35000">
+                    </div>
+                    <button onclick="calculateDirect()" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-bold transition-colors">精算投報優勢</button>
+                </div>
+                <div id="result1" class="mt-6 hidden result-card p-5 rounded-lg bg-gray-50 text-center border"></div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-green-500">
+                <h2 class="text-xl font-bold mb-4 text-green-600">模式二：區域行情估算</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-gray-700">目標區域</label>
+                        <select id="region" class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-green-400 outline-none bg-white">
+                            <optgroup label="基隆市">
+                                <option value="30">安樂區 (估 30萬/坪)</option>
+                                <option value="28">信義區 (估 28萬/坪)</option>
+                                <option value="25">中正區 (估 25萬/坪)</option>
+                            </optgroup>
+                            <optgroup label="台北市">
+                                <option value="135">大安區 (估 135萬/坪)</option>
+                                <option value="130">信義區 (估 130萬/坪)</option>
+                                <option value="120">中正區 (估 120萬/坪)</option>
+                                <option value="115">中山區 (估 115萬/坪)</option>
+                                <option value="110">松山區 (估 110萬/坪)</option>
+                                <option value="100">南港區 (估 100萬/坪)</option>
+                                <option value="95">士林區 (估 95萬/坪)</option>
+                                <option value="90">內湖區 (估 90萬/坪)</option>
+                                <option value="90">大同區 (估 90萬/坪)</option>
+                                <option value="85">文山區 (估 85萬/坪)</option>
+                                <option value="80">北投區 (估 80萬/坪)</option>
+                                <option value="75">萬華區 (估 75萬/坪)</option>
+                            </optgroup>
+                            <optgroup label="新北市">
+                                <option value="75">板橋區 (估 75萬/坪)</option>
+                                <option value="70">永和區 (估 70萬/坪)</option>
+                                <option value="70">新店區 (估 70萬/坪)</option>
+                                <option value="65">中和區 (估 65萬/坪)</option>
+                                <option value="65">三重區 (估 65萬/坪)</option>
+                                <option value="60">新莊區 (估 60萬/坪)</option>
+                                <option value="55">林口區 (估 55萬/坪)</option>
+                                <option value="55">汐止區 (估 55萬/坪)</option>
+                                <option value="45">三峽區 (估 45萬/坪)</option>
+                                <option value="40">淡水區 (估 40萬/坪)</option>
+                            </optgroup>
+                            <optgroup label="桃園市">
+                                <option value="55">中壢區-青埔 (估 55萬/坪)</option>
+                                <option value="45">桃園區 (估 45萬/坪)</option>
+                                <option value="45">中壢區-市區 (估 45萬/坪)</option>
+                                <option value="45">龜山區 (估 45萬/坪)</option>
+                                <option value="35">八德區 (估 35萬/坪)</option>
+                                <option value="35">平鎮區 (估 35萬/坪)</option>
+                            </optgroup>
+                            <optgroup label="新竹縣市">
+                                <option value="75">竹北市 (估 75萬/坪)</option>
+                                <option value="65">新竹市東區 (估 65萬/坪)</option>
+                                <option value="55">新竹市北區 (估 55萬/坪)</option>
+                                <option value="40">新竹市香山區 (估 40萬/坪)</option>
+                            </optgroup>
+                            <optgroup label="苗栗縣">
+                                <option value="35">頭份市 (估 35萬/坪)</option>
+                                <option value="35">竹南鎮 (估 35萬/坪)</option>
+                                <option value="25">苗栗市 (估 25萬/坪)</option>
+                            </optgroup>
+                            <optgroup label="台中市">
+                                <option value="65">西屯區 (估 65萬/坪)</option>
+                                <option value="60">南屯區 (估 60萬/坪)</option>
+                                <option value="55">北屯區 (估 55萬/坪)</option>
+                                <option value="50">西區 (估 50萬/坪)</option>
+                                <option value="45">北區 (估 45萬/坪)</option>
+                                <option value="45">南區 (估 45萬/坪)</option>
+                                <option value="35">豐原區 (估 35萬/坪)</option>
+                                <option value="30">清水/梧棲區 (估 30萬/坪)</option>
+                            </optgroup>
+                            <optgroup label="彰化縣">
+                                <option value="35">彰化市 (估 35萬/坪)</option>
+                                <option value="30">員林市 (估 30萬/坪)</option>
+                            </optgroup>
+                            <optgroup label="南投縣">
+                                <option value="25">草屯鎮 (估 25萬/坪)</option>
+                                <option value="25">南投市 (估 25萬/坪)</option>
+                            </optgroup>
+                            <optgroup label="雲林縣">
+                                <option value="25">斗六市 (估 25萬/坪)</option>
+                                <option value="25">虎尾鎮 (估 25萬/坪)</option>
+                            </optgroup>
+                            <optgroup label="嘉義縣市">
+                                <option value="30">嘉義市東區 (估 30萬/坪)</option>
+                                <option value="30">嘉義市西區 (估 30萬/坪)</option>
+                                <option value="30">太保市 (估 30萬/坪)</option>
+                            </optgroup>
+                            <optgroup label="台南市">
+                                <option value="45">東區 (估 45萬/坪)</option>
+                                <option value="40">北區 (估 40萬/坪)</option>
+                                <option value="40">永康區 (估 40萬/坪)</option>
+                                <option value="40">善化區 (估 40萬/坪)</option>
+                                <option value="35">安南區 (估 35萬/坪)</option>
+                                <option value="35">歸仁區 (估 35萬/坪)</option>
+                            </optgroup>
+                            <optgroup label="高雄市">
+                                <option value="45">左營區 (估 45萬/坪)</option>
+                                <option value="45">鼓山區 (估 45萬/坪)</option>
+                                <option value="35">三民區 (估 35萬/坪)</option>
+                                <option value="35">苓雅區 (估 35萬/坪)</option>
+                                <option value="35">鳳山區 (估 35萬/坪)</option>
+                                <option value="35">楠梓區 (估 35萬/坪)</option>
+                            </optgroup>
+                            <optgroup label="屏東縣">
+                                <option value="25">屏東市 (估 25萬/坪)</option>
+                            </optgroup>
+                            <optgroup label="宜蘭縣">
+                                <option value="40">礁溪鄉 (估 40萬/坪)</option>
+                                <option value="35">羅東鎮 (估 35萬/坪)</option>
+                                <option value="30">宜蘭市 (估 30萬/坪)</option>
+                            </optgroup>
+                            <optgroup label="花東與外島">
+                                <option value="25">花蓮市 (估 25萬/坪)</option>
+                                <option value="25">台東市 (估 25萬/坪)</option>
+                                <option value="25">金門/澎湖 (估 25萬/坪)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-gray-700">室內與權狀坪數 (坪)</label>
+                        <input type="number" id="size" class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-green-400 outline-none" placeholder="例如：25">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-gray-700">預計月租金 (元)</label>
+                        <input type="number" id="rent2" class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-green-400 outline-none" placeholder="例如：25000">
+                    </div>
+                    <button onclick="calculateEstimated()" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-bold transition-colors">估價並評估</button>
+                </div>
+                <div id="result2" class="mt-6 hidden result-card p-5 rounded-lg bg-gray-50 text-center border"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getLevel(price, annualRent, mortgageRate) {
+            const rentalYield = (annualRent / price) * 100;
+            
+            // 核心改動：導入 0050 5% 機會成本
+            const etfRate = parseFloat(document.getElementById('stockRate').value) || 5.0; // 預設 5% 大盤報酬率
+            const annualInterest = price * 0.8 * (mortgageRate / 100); 
+            const opportunityCost = price * 0.2 * (etfRate / 100); // 頭期款投入 0050 的預期獲利
+            
+            // 計算「買房真實資金成本率」
+            const trueCostRate = (0.8 * mortgageRate) + (0.2 * etfRate);
+
+            let level = {};
+            // 判定基準改為與 trueCostRate 進行絕對值對決
+            if (rentalYield >= trueCostRate + 0.5) {
+                level = { borderColor: 'border-red-500', color: 'text-red-600', emoji: '🤩', title: '買爆它！(完勝 0050)', desc: `租金投報率極高。買房效益遠超「租屋+投資 0050(${etfRate}%)」。` };
+            } else if (rentalYield >= trueCostRate) {
+                level = { borderColor: 'border-orange-500', color: 'text-orange-500', emoji: '🙂', title: '買房勝出 (打敗大盤)', desc: `租金投報率大於資金總成本(${trueCostRate.toFixed(2)}%)，買房是更優的財務決策。` };
+            } else if (rentalYield >= trueCostRate - 1.0) {
+                level = { borderColor: 'border-yellow-500', color: 'text-yellow-600', emoji: '😐', title: '投報持平 (須看好房價增值)', desc: `現金流微幅落後 0050。若預期該區房價每年能穩定增值 1% 以上，買房仍可考慮。` };
+            } else if (rentalYield >= trueCostRate - 2.0) {
+                level = { borderColor: 'border-blue-500', color: 'text-blue-500', emoji: '😨', title: '租屋較佳 (機會成本過高)', desc: `買房利息與頭期款機會成本過高。強烈建議租屋，並將頭期款單筆投入 0050。` };
+            } else {
+                level = { borderColor: 'border-purple-500', color: 'text-purple-600', emoji: '😱', title: '無腦租屋 (資產黑洞)', desc: `租金投報慘烈。買房將導致嚴重資產減損，租屋＋定時定額 0050 完勝。` };
+            }
+
+            // 擴充回傳值，供前端 UI 顯示具體金額
+            return { ...level, rentalYield, annualInterest, opportunityCost, trueCostRate };
+        }
+
+        function renderResult(elementId, price, annualRent) {
+            const mortgageRate = parseFloat(document.getElementById('mortgageRate').value);
+            if (!mortgageRate) return alert('請確認房貸利率設定');
+
+            const result = getLevel(price, annualRent, mortgageRate);
+            const el = document.getElementById(elementId);
+            
+            el.className = `mt-6 result-card p-5 rounded-lg bg-white shadow-sm border-t-4 ${result.borderColor}`;
+            el.innerHTML = `
+                <div class="text-5xl mb-3">${result.emoji}</div>
+                <h3 class="text-xl font-bold ${result.color} mb-2">${result.title}</h3>
+                <p class="text-sm text-gray-600 mb-5">${result.desc}</p>
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div class="bg-gray-50 p-3 border rounded-lg">
+                        <span class="block text-gray-500 text-xs mb-1">物件租金投報率</span>
+                        <span class="font-bold text-gray-800 text-lg">${result.rentalYield.toFixed(2)}%</span>
+                    </div>
+                    <div class="bg-gray-50 p-3 border rounded-lg">
+                        <span class="block text-gray-500 text-xs mb-1">當前房貸利率</span>
+                        <span class="font-bold text-gray-800 text-lg">${mortgageRate}%</span>
+                    </div>
+                    <div class="bg-gray-50 p-3 border rounded-lg col-span-2">
+                        <span class="block text-gray-500 text-xs mb-1">首年純利息預估 (8成貸) vs 年租金</span>
+                        <div class="flex items-center justify-center gap-2 mt-1">
+                            <span class="font-bold text-red-600 text-lg">利息 ${(result.annualInterest / 10000).toFixed(1)} 萬</span> 
+                            <span class="text-gray-400">vs</span> 
+                            <span class="font-bold text-green-600 text-lg">租金 ${(annualRent / 10000).toFixed(1)} 萬</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            el.classList.remove('hidden');
+        }
+
+        function calculateDirect() {
+            const price = parseFloat(document.getElementById('price1').value) * 10000;
+            const rent = parseFloat(document.getElementById('rent1').value);
+            if (!price || !rent) return alert('請輸入完整數值');
+            renderResult('result1', price, rent * 12);
+        }
+
+        function calculateEstimated() {
+            const pricePerPing = parseFloat(document.getElementById('region').value) * 10000;
+            const size = parseFloat(document.getElementById('size').value);
+            const rent = parseFloat(document.getElementById('rent2').value);
+            if (!size || !rent) return alert('請輸入坪數與租金');
+
+            const estimatedPrice = pricePerPing * size;
+            renderResult('result2', estimatedPrice, rent * 12);
+            
+            const el = document.getElementById('result2');
+            el.innerHTML = `<div class="mb-4 p-3 bg-green-50 text-green-800 border border-green-200 rounded-lg text-sm font-bold shadow-sm">💡 系統估算房屋總價：${(estimatedPrice/10000).toFixed(0)} 萬</div>` + el.innerHTML;
+        }
+    </script>
+</body>
+</html>
